@@ -28,7 +28,7 @@
   }
   @keyframes glow{from{transform:scale(1);box-shadow:0 0 0 #f00}to{transform:scale(1.06);box-shadow:0 0 22px #f00}}
 
-  /* ── RECAPTURE (black screen after held-escape) ── */
+  /* ── RECAPTURE ── */
   #recapture{
     position:fixed;inset:0;background:#000;z-index:900000;
     display:none;flex-direction:column;align-items:center;justify-content:center;
@@ -49,7 +49,7 @@
     background:#cc0000;color:#fff;border:none;pointer-events:none;
     animation:glow .5s ease infinite alternate;font-family:'Comic Neue',cursive;
   }
-  #recapture .rc-stat{font-size:11px;color:#333;font-family:monospace;margin-top:4px;}
+  #recapture .rc-stat{font-size:11px;color:#444;font-family:monospace;margin-top:4px;}
 
   /* ── FAKE CURSOR ── */
   #fc{
@@ -57,17 +57,18 @@
     z-index:9999999;display:none;line-height:1;
     left:50%;top:50%;
   }
-  #recapture.show ~ #fc, #fc.big{font-size:30px;}
+  #fc.big{font-size:30px;animation:fcpulse .4s ease infinite alternate;}
+  @keyframes fcpulse{from{transform:scale(1)}to{transform:scale(1.3)}}
 
   /* ── WIN95 DESKTOP ── */
   #desktop-text{
     position:fixed;top:20px;left:0;right:0;text-align:center;color:#ffff00;
     font-family:'Press Start 2P',monospace;font-size:11px;letter-spacing:2px;
-    text-shadow:2px 2px #000;z-index:1000;animation:blink .5s step-end infinite;
+    text-shadow:2px 2px #000;z-index:100;animation:blink .5s step-end infinite;
   }
   .dicon{
     position:absolute;display:flex;flex-direction:column;align-items:center;
-    width:72px;cursor:pointer;padding:4px;z-index:1000;
+    width:72px;cursor:pointer;padding:4px;z-index:100;
   }
   .dicon:hover{background:rgba(0,0,128,0.4);}
   .dicon .di{font-size:32px;}
@@ -78,6 +79,7 @@
     position:absolute;background:var(--gray);border:2px solid;
     border-color:var(--wh) var(--dark) var(--dark) var(--wh);
     box-shadow:3px 3px 0 #000;z-index:1100;
+    min-width:200px;
   }
   .tbar{
     background:var(--blue);color:#fff;padding:3px 6px;font-size:12px;font-weight:700;
@@ -90,6 +92,7 @@
     font-size:9px;display:flex;align-items:center;justify-content:center;
     cursor:pointer;font-family:monospace;font-weight:bold;color:#000;
   }
+  .tbtn:active{border-color:var(--dark) var(--wh) var(--wh) var(--dark);}
   .wcont{padding:12px;font-size:13px;line-height:1.6;}
   .brow{display:flex;gap:8px;justify-content:center;margin-top:12px;}
   .wbtn{
@@ -98,6 +101,7 @@
     padding:4px 20px;font-weight:700;font-size:13px;cursor:pointer;min-width:80px;
     font-family:'Comic Neue',cursive;
   }
+  .wbtn:hover{background:#d4d0c8;}
   .wbtn:active{border-color:var(--dark) var(--wh) var(--wh) var(--dark);}
   #mainwin{top:80px;left:50%;transform:translateX(-50%);width:460px;}
 
@@ -122,6 +126,7 @@
     border-color:var(--wh) var(--dark) var(--dark) var(--wh);
     cursor:pointer;z-index:2000;font-family:'Comic Neue',cursive;
   }
+  #exitbtn:hover{background:#d4d0c8;}
   #badge{
     position:fixed;bottom:42px;right:6px;font-size:10px;font-weight:700;
     padding:2px 6px;background:var(--gray);border:1px solid var(--dark);z-index:2000;
@@ -136,6 +141,7 @@
     border-color:var(--wh) var(--dark) var(--dark) var(--wh);
     padding:4px 8px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Comic Neue',cursive;
   }
+  .sbtn:hover{background:#d4d0c8;}
   #clk{margin-left:auto;font-size:11px;border:1px solid;border-color:var(--dark) var(--wh) var(--wh) var(--dark);padding:2px 6px;background:var(--gray);}
 
   .conf{position:fixed;width:8px;height:12px;border-radius:2px;animation:cffall linear forwards;z-index:9000;pointer-events:none;}
@@ -155,13 +161,13 @@
   <div style="font-size:13px;color:#888;line-height:2;">
     ⌨️ Tapped Escape → intercepted (Keyboard Lock API)<br>
     🖱️ Cursor → imprisoned (Pointer Lock)<br>
-    🔒 Held Escape → black screen, cursor still locked<br>
+    🔒 Held Escape → black screen, cursor still locked
   </div>
   <button id="enter-btn" onclick="enter()">CLICK HERE TO CLAIM →</button>
   <div style="font-size:10px;color:#333;font-family:monospace;">legally binding. resistance futile.</div>
 </div>
 
-<!-- RECAPTURE OVERLAY (shown after held-escape exits fullscreen) -->
+<!-- RECAPTURE OVERLAY -->
 <div id="recapture" onclick="recaptureClick()">
   <div class="rc-spin">🔒</div>
   <h1>YOU HELD ESCAPE.</h1>
@@ -186,7 +192,7 @@
 <div class="dicon" style="top:60px;left:105px;" ondblclick="spawnProg()"><span class="di">⚙️</span><span class="dl">More Popups.exe</span></div>
 
 <div class="win" id="mainwin">
-  <div class="tbar" onmousedown="drag(event,'mainwin')">
+  <div class="tbar" onmousedown="dragStart(event,'mainwin')">
     <span>⚠ Critical System Alert</span>
     <div class="tbtns">
       <div class="tbtn" onclick="noClose()">_</div>
@@ -222,7 +228,6 @@
 </div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────────────────────────
 var entered = false;
 var attempts = 0;
 var heldEsc = 0;
@@ -255,81 +260,67 @@ function jailSnd(){ beep(110,.8,'sawtooth'); setTimeout(function(){beep(82,.6,'s
 
 // ── ENTER ──────────────────────────────────────────────────────────────────────
 function enter(){
-  // Hide entry overlay first so user sees it worked
   document.getElementById('entry').style.display = 'none';
   entered = true;
-
-  // Resume audio (needs user gesture — we have one)
   try { if(AC) AC.resume(); } catch(_){}
-
   boing();
   spawnConfetti();
   startPbar();
-
-  // Fullscreen — keyboard lock fires inside goFS() only after FS is confirmed
   goFS();
-
-  // Pointer lock (needs a moment after FS is granted)
-  setTimeout(lockPtr, 500);
-
-  setTimeout(spawnErr, 900);
-  setTimeout(spawnProg, 1900);
-  setTimeout(spawnErr, 3200);
+  // Pointer lock fires after fullscreen is confirmed (via fullscreenchange)
+  // Keyboard lock also fires in fullscreenchange — NOT here
 }
 
 // ── FULLSCREEN ─────────────────────────────────────────────────────────────────
 function goFS(){
   try {
     var el = document.documentElement;
-    var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-    if(fn){
-      fn.call(el).then(function(){
-        fsActive=true;
-        updateBadge();
-        // Lock keyboard ONLY after fullscreen is confirmed active.
-        // Keyboard Lock API silently fails if called before fullscreen.
-        lockKB();
-      }).catch(function(){});
-    }
+    var fn = el.requestFullscreen || el.webkitRequestFullscreen
+           || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if(fn) fn.call(el).catch(function(){});
   } catch(_){}
 }
 
-// Listen for fullscreen exit
+// All setup happens here — fullscreenchange is the reliable signal,
+// not the requestFullscreen promise (which fires too early on remote hosts)
 ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange'].forEach(function(ev){
   document.addEventListener(ev, onFSChange);
 });
 
 function isFS(){
-  return !!(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement);
+  return !!(document.fullscreenElement || document.webkitFullscreenElement
+          || document.mozFullScreenElement || document.msFullscreenElement);
 }
 
 function onFSChange(){
   var nowFs = isFS();
-  if(!nowFs && entered){
+  if(nowFs && entered){
+    // We just entered fullscreen — NOW it's safe to call keyboard lock
+    fsActive = true;
+    updateBadge();
+    hideRecapture();
+    lockKB();                                     // safe: FS is confirmed active
+    if(!ptrLocked) setTimeout(function(){ lockPtr(false); }, 150);
+
+    if(attempts === 0){
+      // First entry — spawn initial popups
+      setTimeout(spawnErr, 900);
+      setTimeout(spawnProg, 1900);
+      setTimeout(spawnErr, 3200);
+    }
+  } else if(!nowFs && entered){
     // Held-escape kicked them out
     fsActive = false;
+    kbLocked = false;
     heldEsc++;
     attempts++;
     escSnd();
     shake();
     updateBadge();
     updateRcStat();
-
-    // Show recapture black screen immediately
     showRecapture();
-
-    // Grab pointer lock RIGHT NOW — cursor can't reach browser chrome
-    // Use a tiny delay so the fullscreen exit animation finishes
-    setTimeout(function(){ lockPtr(true); }, 50);
-
-    kbLocked = false;
-  } else if(nowFs){
-    fsActive = true;
-    hideRecapture();
-    updateBadge();
-    // FS is now confirmed active — safe to call keyboard lock immediately
-    lockKB();
-    if(!ptrLocked) setTimeout(function(){ lockPtr(false); }, 200);
+    // Grab pointer lock immediately — cursor can't reach browser chrome
+    setTimeout(function(){ lockPtr(true); }, 60);
   }
 }
 
@@ -349,9 +340,8 @@ function updateRcStat(){
   if(el) el.textContent = 'held-escape: '+heldEsc+' | attempts: '+attempts;
 }
 function recaptureClick(){
-  // This click IS a user gesture — requestFullscreen will work
   hideRecapture();
-  goFS();
+  goFS();  // click = user gesture = requestFullscreen works
   boing();
   setTimeout(function(){
     mini('Welcome back 😈\nHeld-escape #'+heldEsc+'\nYour cursor never reached the close button.');
@@ -359,32 +349,28 @@ function recaptureClick(){
 }
 
 // ── KEYBOARD LOCK ──────────────────────────────────────────────────────────────
+// Only called from inside fullscreenchange after isFS() is confirmed true.
+// This is the key fix — calling it from the FS promise resolves too early
+// on remote hosts. The fullscreenchange event is the reliable signal.
 function lockKB(){
   try {
     if(navigator.keyboard && navigator.keyboard.lock){
       navigator.keyboard.lock(['Escape','F11','MetaLeft','MetaRight'])
         .then(function(){ kbLocked=true; updateBadge(); })
-        .catch(function(){ kbLocked=false; });
+        .catch(function(e){ console.log('KB lock failed:', e); kbLocked=false; });
     }
-  } catch(_){}
+  } catch(e){ console.log('KB lock error:', e); }
 }
 
 // ── POINTER LOCK ──────────────────────────────────────────────────────────────
-// onRc = true means we're on the recapture overlay (outside fullscreen)
 function lockPtr(onRc){
   if(!entered) return;
   try {
-    // requestPointerLock with no options — safest, works everywhere
-    var el = onRc
-      ? (document.getElementById('recapture') || document.documentElement)
-      : document.documentElement;
-    var p = el.requestPointerLock();
-    // Some browsers return a promise, some return undefined
-    if(p && p.then){
-      p.then(function(){ ptrLocked=true; updateBadge(); showFC(true); })
-       .catch(function(){ /* retry below */ });
-    }
-    // Whether or not it returned a promise, pointerlockchange fires if it worked
+    var el = (onRc && document.getElementById('recapture'))
+           ? document.getElementById('recapture')
+           : document.documentElement;
+    var result = el.requestPointerLock();
+    if(result && result.catch) result.catch(function(){});
   } catch(_){}
 }
 
@@ -393,13 +379,15 @@ document.addEventListener('pointerlockchange', function(){
   updateBadge();
   showFC(ptrLocked);
   if(!ptrLocked && entered){
-    // Re-grab after cooldown; if recapture screen is showing, lock to it
     var onRc = document.getElementById('recapture').classList.contains('show');
-    setTimeout(function(){ lockPtr(onRc); }, 900);
+    setTimeout(function(){ lockPtr(onRc); }, 800);
   }
 });
 
-// ── FAKE CURSOR ────────────────────────────────────────────────────────────────
+// ── FAKE CURSOR + CLICK ROUTING ───────────────────────────────────────────────
+// When pointer is locked, all clicks land on whatever is under the REAL cursor
+// position (center of screen), not the fake cursor. We intercept clicks and
+// re-fire them at the fake cursor's (fcx, fcy) position so everything is clickable.
 document.addEventListener('mousemove', function(e){
   if(ptrLocked){
     fcx = Math.max(0, Math.min(window.innerWidth-28,  fcx + (e.movementX||0)));
@@ -409,6 +397,7 @@ document.addEventListener('mousemove', function(e){
     fc.style.top  = fcy+'px';
     fc.style.transform = 'none';
   }
+  // Dragging
   if(dragEl){
     var cx = ptrLocked ? fcx : e.clientX;
     var cy = ptrLocked ? fcy : e.clientY;
@@ -417,7 +406,45 @@ document.addEventListener('mousemove', function(e){
     dragEl.style.transform = 'none';
   }
 });
-document.addEventListener('mouseup', function(){ dragEl=null; });
+
+// Intercept clicks and route to fake cursor position when pointer is locked
+document.addEventListener('click', function(e){
+  if(!ptrLocked) return;
+  // Don't re-process synthetic events we dispatched
+  if(e._fromFakeClick) return;
+
+  // Find the element at the fake cursor's position
+  var el = document.elementFromPoint(fcx, fcy);
+  if(el && el !== e.target){
+    e.stopPropagation();
+    e.preventDefault();
+    // Dispatch a real click event on the correct element
+    var synthetic = new MouseEvent('click', {
+      bubbles: true, cancelable: true,
+      clientX: fcx, clientY: fcy
+    });
+    synthetic._fromFakeClick = true;
+    el.dispatchEvent(synthetic);
+  }
+}, true); // capture phase so we get it first
+
+// Intercept mousedown for dragging too
+document.addEventListener('mousedown', function(e){
+  if(!ptrLocked) return;
+  if(e._fromFakeClick) return;
+  var el = document.elementFromPoint(fcx, fcy);
+  if(el && el !== e.target){
+    e.stopPropagation();
+    var synthetic = new MouseEvent('mousedown', {
+      bubbles: true, cancelable: true,
+      clientX: fcx, clientY: fcy
+    });
+    synthetic._fromFakeClick = true;
+    el.dispatchEvent(synthetic);
+  }
+}, true);
+
+document.addEventListener('mouseup', function(){ dragEl = null; });
 
 function showFC(show){
   var fc = document.getElementById('fc');
@@ -436,20 +463,20 @@ function updateBadge(){
   var el = document.getElementById('badge');
   if(!el) return;
   var p=[];
-  if(fsActive) p.push('⛶FS');
-  if(kbLocked) p.push('⌨KB');
+  if(fsActive)  p.push('⛶FS');
+  if(kbLocked)  p.push('⌨KB');
   if(ptrLocked) p.push('🖱PTR');
   el.textContent = p.length ? '🔒 '+p.join(' · ') : '🔓 exposed';
 }
 
-// ── KEYBOARD ──────────────────────────────────────────────────────────────────
+// ── KEYBOARD HANDLER ──────────────────────────────────────────────────────────
 document.addEventListener('keydown', function(e){
   if(!entered) return;
   if(e.key==='Escape'){
-    // With KB lock active in FS, tapped Escape comes here as a normal keydown
+    // With KB lock active, tapped Escape arrives here as normal keydown
     e.preventDefault(); e.stopPropagation();
     attempts++; escSnd(); shake(); updateRcStat();
-    mini('Escape intercepted 😂\nKeyboard Lock caught it.\nAttempt #'+attempts);
+    mini('Escape intercepted 😂\nKeyboard Lock caught it before it did anything.\nAttempt #'+attempts);
     return false;
   }
   var blocked = (e.ctrlKey && 'wWrRtT'.indexOf(e.key)>=0) ||
@@ -477,15 +504,13 @@ document.addEventListener('contextmenu', function(e){
   sadBeep();
 });
 window.addEventListener('beforeunload', function(e){
-  e.preventDefault();
-  e.returnValue="We have snacks!! 🍪 Please stay!!";
+  e.preventDefault(); e.returnValue="We have snacks!! 🍪 Please stay!!";
   return e.returnValue;
 });
 document.addEventListener('visibilitychange', function(){
   if(document.hidden){
-    var m=["pls dont go 🥺","cursor is still locked 😈","held ESC = black screen","YOU CANNOT LEAVE","nice try 😂","cursor: imprisoned"];
-    document.title = m[heldEsc % m.length];
-    alarm();
+    var m=["pls dont go 🥺","cursor still locked 😈","held ESC = black screen","YOU CANNOT LEAVE","nice try 😂","cursor: imprisoned"];
+    document.title = m[heldEsc % m.length]; alarm();
   } else {
     document.title = "totally normal website :)";
     if(entered && !isFS()) goFS();
@@ -514,7 +539,8 @@ function noClose(){
 }
 
 // ── DRAG ──────────────────────────────────────────────────────────────────────
-function drag(e, id){
+function dragStart(e, id){
+  if(e._fromFakeClick === true) return; // already re-dispatched with correct coords
   dragEl = document.getElementById(id);
   var r = dragEl.getBoundingClientRect();
   var cx = ptrLocked ? fcx : e.clientX;
@@ -524,12 +550,12 @@ function drag(e, id){
   e.preventDefault();
 }
 
-// ── POPUPS ────────────────────────────────────────────────────────────────────
+// ── POPUP HELPERS ─────────────────────────────────────────────────────────────
 var ERRS = [
   {t:"⚠ Keyboard Lock Active",    i:"⌨️", m:"Tapped Escape is intercepted by\nthe Keyboard Lock API — it never exits FS.\n\nHeld Escape gets you a black screen\nwhere your cursor is STILL imprisoned.\nThen you click. And you're back. Tragic."},
   {t:"🖱️ Cursor Status Report",   i:"🔒", m:"Your cursor is trapped inside the browser.\n\nEven after held-Escape exits fullscreen,\nPointer Lock activates on the black screen.\nYou cannot reach the ✕ button. Ever."},
   {t:"💀 FATAL EXCEPTION",         i:"💀", m:"POINTER_LOCK_ACTIVE_OUTSIDE_FULLSCREEN\n\nYou escaped fullscreen for 0.3 seconds.\nThen you clicked on the black screen.\nNow you're back. This loop is your life."},
-  {t:"📋 Escape Attempt Log",      i:"📋", m:"Keyboard Lock intercepts: "+attempts+"\nHeld-Escape uses: "+heldEsc+"\n\nEach held-Escape leads to a\nblack screen with a locked cursor.\nYou always click back in."},
+  {t:"📋 Escape Attempt Log",      i:"📋", m:"Keyboard Lock intercepts: "+attempts+"\nHeld-Escape uses: "+heldEsc+"\n\nEach held-Escape leads to a black screen\nwith a locked cursor. You always click back in."},
   {t:"🎉 Achievement Unlocked!",   i:"🏆", m:"'Escape Artist (Failed)'\n\nUsed held-Escape to exit fullscreen.\nFound a black screen with trapped cursor.\nClicked back in. Again.\n\n+0 progress toward freedom."},
   {t:"🍪 Cookie Alert",            i:"🍪", m:"47,293 cookies installed on your device.\nSome are oatmeal raisin.\nThis is your fault for clicking."},
   {t:"🔑 Key & Cursor Status",     i:"🔑", m:"Tapped Escape (in FS) → KEYBOARD LOCKED\nHeld Escape → black screen → CURSOR STILL LOCKED\nMouse cursor → CANNOT reach browser ✕\nFreedom → PENDING (indefinitely)"},
@@ -545,23 +571,29 @@ function spawnErr(){
   el.style.top  = (40+Math.random()*(window.innerHeight-220))+'px';
   el.style.zIndex = 5000+popN;
   el.innerHTML =
-    '<div class="tbar" onmousedown="drag(event,\''+id+'\')">'+
+    '<div class="tbar" onmousedown="dragStart(event,\''+id+'\')">'+
       '<span>'+d.t+'</span>'+
       '<div class="tbtns">'+
         '<div class="tbtn" onclick="noClose()">_</div>'+
         '<div class="tbtn" onclick="noClose()">□</div>'+
-        '<div class="tbtn" style="font-size:11px;" onclick="noClose()">✕</div>'+
+        '<div class="tbtn" style="font-size:11px;" onclick="dismissPop(\''+id+'\')">✕</div>'+
       '</div>'+
     '</div>'+
     '<div class="wcont" style="white-space:pre-line;">'+
       '<span style="font-size:26px;float:left;margin-right:10px;">'+d.i+'</span>'+d.m+
       '<div class="brow">'+
-        '<button class="wbtn" onclick="document.getElementById(\''+id+'\').remove();spawnErr();">OK</button>'+
-        '<button class="wbtn" onclick="document.getElementById(\''+id+'\').remove();spawnErr();">Cancel</button>'+
+        '<button class="wbtn" onclick="dismissPop(\''+id+'\')">OK</button>'+
+        '<button class="wbtn" onclick="noClose()">Cancel</button>'+
       '</div>'+
     '</div>';
   document.body.appendChild(el);
-  setTimeout(function(){ if(document.getElementById(id)) spawnErr(); }, 7000);
+  setTimeout(function(){ if(document.getElementById(id)) spawnErr(); }, 8000);
+}
+
+function dismissPop(id){
+  var el = document.getElementById(id);
+  if(el) el.remove();
+  spawnErr(); // immediately spawn a new one
 }
 
 function spawnProg(){
@@ -573,7 +605,7 @@ function spawnProg(){
   el.style.top  = (40+Math.random()*(window.innerHeight-220))+'px';
   el.style.zIndex = 5000+popN;
   el.innerHTML =
-    '<div class="tbar" onmousedown="drag(event,\''+id+'\')">'+
+    '<div class="tbar" onmousedown="dragStart(event,\''+id+'\')">'+
       '<span>💾 Please Wait</span>'+
       '<div class="tbtns"><div class="tbtn" onclick="noClose()">✕</div></div>'+
     '</div>'+
@@ -609,18 +641,22 @@ function mini(msg){
   el.style.top=(28+Math.random()*50)+'px';
   el.style.zIndex=9000+popN; el.style.width='290px';
   el.innerHTML=
-    '<div class="tbar" onmousedown="drag(event,\''+id+'\')">'+
+    '<div class="tbar" onmousedown="dragStart(event,\''+id+'\')">'+
       '<span>🚫 Nope</span>'+
-      '<div class="tbtns"><div class="tbtn" onclick="this.closest(\'.popup\').remove();">✕</div></div>'+
+      '<div class="tbtns"><div class="tbtn" onclick="dismissMini(\''+id+'\')">✕</div></div>'+
     '</div>'+
     '<div class="wcont" style="white-space:pre-line;font-size:12px;">'+msg+
-      '<div class="brow"><button class="wbtn" onclick="this.closest(\'.popup\').remove();">OK Fine...</button></div>'+
+      '<div class="brow"><button class="wbtn" onclick="dismissMini(\''+id+'\')">OK Fine...</button></div>'+
     '</div>';
   document.body.appendChild(el);
-  setTimeout(function(){ if(document.getElementById(id)) el.remove(); },5000);
+  setTimeout(function(){ if(document.getElementById(id)) el.remove(); },6000);
 }
 
-// ── PROGRESS BAR (loops) ──────────────────────────────────────────────────────
+function dismissMini(id){
+  var el=document.getElementById(id); if(el) el.remove();
+}
+
+// ── MAIN PROGRESS BAR ─────────────────────────────────────────────────────────
 function startPbar(){
   var p=0;
   setInterval(function(){
@@ -639,26 +675,21 @@ function startPbar(){
 function spawnConfetti(){
   var c=['#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff','#00ffff','#ff8800'];
   for(var i=0;i<60;i++){
-    (function(i){
-      setTimeout(function(){
-        var el=document.createElement('div'); el.className='conf';
-        el.style.left=Math.random()*100+'vw';
-        el.style.background=c[Math.floor(Math.random()*c.length)];
-        el.style.animationDuration=(1.5+Math.random()*2)+'s';
-        el.style.zIndex=9000;
-        document.body.appendChild(el);
-        setTimeout(function(){el.remove();},4000);
-      },i*30);
-    })(i);
+    (function(i){setTimeout(function(){
+      var el=document.createElement('div'); el.className='conf';
+      el.style.left=Math.random()*100+'vw';
+      el.style.background=c[Math.floor(Math.random()*c.length)];
+      el.style.animationDuration=(1.5+Math.random()*2)+'s';
+      el.style.zIndex=9000;
+      document.body.appendChild(el); setTimeout(function(){el.remove();},4000);
+    },i*30);})(i);
   }
 }
 
 // ── SHAKE ─────────────────────────────────────────────────────────────────────
 function shake(){
-  document.body.classList.remove('shaking');
-  void document.body.offsetWidth;
-  document.body.classList.add('shaking');
-  setTimeout(function(){document.body.classList.remove('shaking');},500);
+  document.body.classList.remove('shaking'); void document.body.offsetWidth;
+  document.body.classList.add('shaking'); setTimeout(function(){document.body.classList.remove('shaking');},500);
 }
 
 // ── CLOCK ─────────────────────────────────────────────────────────────────────
