@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>totally normal website :)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{--bg:#008080;--gray:#c0c0c0;--dark:#808080;--wh:#ffffff;--blue:#000080;}
+
+  body{
+    background:var(--bg);font-family:'Comic Neue','Comic Sans MS',cursive;
+    overflow:hidden;height:100vh;width:100vw;user-select:none;
+  }
+
+  /* ── ENTRY ── */
+  #entry{
+    position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:99999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;gap:18px;text-align:center;
+  }
+  #entry .icon{font-size:80px;animation:bob .5s ease infinite alternate;}
+  @keyframes bob{to{transform:translateY(-16px)}}
+  #enter-btn{
+    font-size:18px;font-weight:700;padding:14px 44px;
+    background:#dd1111;color:#fff;border:3px solid #ff0000;cursor:pointer;
+    animation:glow .9s ease infinite alternate;font-family:'Comic Neue',cursive;
+  }
+  @keyframes glow{from{transform:scale(1);box-shadow:0 0 0 #f00}to{transform:scale(1.06);box-shadow:0 0 22px #f00}}
+
+  /* ── RECAPTURE (black screen after held-escape) ── */
+  #recapture{
+    position:fixed;inset:0;background:#000;z-index:900000;
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;text-align:center;cursor:none;
+  }
+  #recapture.show{display:flex;}
+  #recapture .rc-spin{font-size:72px;animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #recapture h1{
+    font-family:'Press Start 2P',monospace;font-size:18px;color:#ff2222;
+    line-height:1.7;animation:blink .3s step-end infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
+  #recapture p{font-size:15px;color:#aaa;max-width:500px;line-height:1.8;}
+  #recapture p strong{color:#ff6666;}
+  #recapture .rc-btn{
+    font-size:17px;font-weight:700;padding:14px 44px;
+    background:#cc0000;color:#fff;border:none;pointer-events:none;
+    animation:glow .5s ease infinite alternate;font-family:'Comic Neue',cursive;
+  }
+  #recapture .rc-stat{font-size:11px;color:#333;font-family:monospace;margin-top:4px;}
+
+  /* ── FAKE CURSOR ── */
+  #fc{
+    position:fixed;font-size:22px;pointer-events:none;
+    z-index:9999999;display:none;line-height:1;
+    left:50%;top:50%;
+  }
+  #recapture.show ~ #fc, #fc.big{font-size:30px;}
+
+  /* ── WIN95 DESKTOP ── */
+  #desktop-text{
+    position:fixed;top:20px;left:0;right:0;text-align:center;color:#ffff00;
+    font-family:'Press Start 2P',monospace;font-size:11px;letter-spacing:2px;
+    text-shadow:2px 2px #000;z-index:1000;animation:blink .5s step-end infinite;
+  }
+  .dicon{
+    position:absolute;display:flex;flex-direction:column;align-items:center;
+    width:72px;cursor:pointer;padding:4px;z-index:1000;
+  }
+  .dicon:hover{background:rgba(0,0,128,0.4);}
+  .dicon .di{font-size:32px;}
+  .dicon .dl{font-size:11px;color:#fff;text-align:center;text-shadow:1px 1px 2px #000;margin-top:2px;font-weight:700;}
+
+  /* ── WINDOWS ── */
+  .win{
+    position:absolute;background:var(--gray);border:2px solid;
+    border-color:var(--wh) var(--dark) var(--dark) var(--wh);
+    box-shadow:3px 3px 0 #000;z-index:1100;
+  }
+  .tbar{
+    background:var(--blue);color:#fff;padding:3px 6px;font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:space-between;cursor:move;user-select:none;
+  }
+  .tbtns{display:flex;gap:2px;}
+  .tbtn{
+    width:16px;height:14px;background:var(--gray);border:1px solid;
+    border-color:var(--wh) var(--dark) var(--dark) var(--wh);
+    font-size:9px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-family:monospace;font-weight:bold;color:#000;
+  }
+  .wcont{padding:12px;font-size:13px;line-height:1.6;}
+  .brow{display:flex;gap:8px;justify-content:center;margin-top:12px;}
+  .wbtn{
+    background:var(--gray);border:2px solid;
+    border-color:var(--wh) var(--dark) var(--dark) var(--wh);
+    padding:4px 20px;font-weight:700;font-size:13px;cursor:pointer;min-width:80px;
+    font-family:'Comic Neue',cursive;
+  }
+  .wbtn:active{border-color:var(--dark) var(--wh) var(--wh) var(--dark);}
+  #mainwin{top:80px;left:50%;transform:translateX(-50%);width:460px;}
+
+  .pbar-o{
+    background:var(--dark);border:1px solid;
+    border-color:var(--dark) var(--wh) var(--wh) var(--dark);
+    height:18px;margin:8px 0;overflow:hidden;
+  }
+  .pbar-i{height:100%;background:var(--blue);width:0%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;}
+
+  .popup{
+    position:fixed;background:var(--gray);border:2px solid;
+    border-color:var(--wh) var(--dark) var(--dark) var(--wh);
+    box-shadow:3px 3px 0 #000;z-index:5000;width:290px;
+    animation:popin .1s ease;
+  }
+  @keyframes popin{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+  #exitbtn{
+    position:fixed;padding:6px 16px;font-weight:700;font-size:14px;
+    background:var(--gray);border:2px solid;
+    border-color:var(--wh) var(--dark) var(--dark) var(--wh);
+    cursor:pointer;z-index:2000;font-family:'Comic Neue',cursive;
+  }
+  #badge{
+    position:fixed;bottom:42px;right:6px;font-size:10px;font-weight:700;
+    padding:2px 6px;background:var(--gray);border:1px solid var(--dark);z-index:2000;
+  }
+  #taskbar{
+    position:fixed;bottom:0;left:0;right:0;height:36px;background:var(--gray);
+    border-top:2px solid var(--wh);display:flex;align-items:center;
+    padding:2px 4px;gap:4px;z-index:2000;
+  }
+  .sbtn{
+    background:var(--gray);border:2px solid;
+    border-color:var(--wh) var(--dark) var(--dark) var(--wh);
+    padding:4px 8px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Comic Neue',cursive;
+  }
+  #clk{margin-left:auto;font-size:11px;border:1px solid;border-color:var(--dark) var(--wh) var(--wh) var(--dark);padding:2px 6px;background:var(--gray);}
+
+  .conf{position:fixed;width:8px;height:12px;border-radius:2px;animation:cffall linear forwards;z-index:9000;pointer-events:none;}
+  @keyframes cffall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+  @keyframes shake{0%,100%{transform:none}15%,45%,75%{transform:translate(-5px,-3px)}30%,60%,90%{transform:translate(5px,3px)}}
+  .shaking{animation:shake .5s ease;}
+</style>
+</head>
+<body>
+
+<!-- ENTRY OVERLAY -->
+<div id="entry">
+  <div class="icon">🔒</div>
+  <div style="font-size:22px;max-width:400px;line-height:1.4;">
+    You have been selected to<br><span style="color:#ffff00;">CLAIM YOUR FREE PRIZE!!</span>
+  </div>
+  <div style="font-size:13px;color:#888;line-height:2;">
+    ⌨️ Tapped Escape → intercepted (Keyboard Lock API)<br>
+    🖱️ Cursor → imprisoned (Pointer Lock)<br>
+    🔒 Held Escape → black screen, cursor still locked<br>
+  </div>
+  <button id="enter-btn" onclick="enter()">CLICK HERE TO CLAIM →</button>
+  <div style="font-size:10px;color:#333;font-family:monospace;">legally binding. resistance futile.</div>
+</div>
+
+<!-- RECAPTURE OVERLAY (shown after held-escape exits fullscreen) -->
+<div id="recapture" onclick="recaptureClick()">
+  <div class="rc-spin">🔒</div>
+  <h1>YOU HELD ESCAPE.</h1>
+  <p>
+    Congratulations. You're on a black screen.<br>
+    Your cursor is <strong>still trapped</strong> — it cannot reach the browser chrome.<br>
+    Your only option is to <strong>click anywhere.</strong><br>
+    Clicking puts you right back.
+  </p>
+  <div class="rc-btn">CLICK ANYWHERE TO RETURN TO YOUR PRISON</div>
+  <div class="rc-stat" id="rcstat">held-escape: 0 | attempts: 0</div>
+</div>
+
+<!-- FAKE CURSOR -->
+<div id="fc">🔒</div>
+
+<!-- DESKTOP -->
+<div id="desktop-text">⚠ CURSOR IMPRISONED — ESC INTERCEPTED — NO EXIT ⚠</div>
+<div class="dicon" style="top:60px;left:20px;"  ondblclick="spawnErr()"><span class="di">💾</span><span class="dl">not a virus.exe</span></div>
+<div class="dicon" style="top:165px;left:20px;" ondblclick="noClose()"><span class="di">📁</span><span class="dl">your exit (lol)</span></div>
+<div class="dicon" style="top:270px;left:20px;" ondblclick="spawnErr()"><span class="di">🗑️</span><span class="dl">Recycle Bin (full)</span></div>
+<div class="dicon" style="top:60px;left:105px;" ondblclick="spawnProg()"><span class="di">⚙️</span><span class="dl">More Popups.exe</span></div>
+
+<div class="win" id="mainwin">
+  <div class="tbar" onmousedown="drag(event,'mainwin')">
+    <span>⚠ Critical System Alert</span>
+    <div class="tbtns">
+      <div class="tbtn" onclick="noClose()">_</div>
+      <div class="tbtn" onclick="noClose()">□</div>
+      <div class="tbtn" style="font-size:11px;" onclick="noClose()">✕</div>
+    </div>
+  </div>
+  <div class="wcont">
+    <span style="font-size:28px;float:left;margin-right:12px;">🛑</span>
+    <strong>FATAL ERROR 0x0000NOPE</strong><br>
+    Tapped Escape: <strong>intercepted</strong>.<br>
+    Held Escape: black screen, cursor <strong>still locked</strong>.<br>
+    Clicking on the black screen: <strong>re-imprisons you</strong>.<br>
+    <div style="font-size:11px;color:#555;margin-top:6px;">Have a wonderful day! 😊</div>
+    <div class="pbar-o" style="margin-top:10px;"><div class="pbar-i" id="mainpb"></div></div>
+    <div id="pblbl" style="font-size:11px;color:#555;text-align:center;margin-top:2px;">Installing more locks...</div>
+    <div class="brow">
+      <button class="wbtn" onclick="noClose()">Close</button>
+      <button class="wbtn" onclick="noClose()">Cancel</button>
+      <button class="wbtn" onclick="spawnErr()">OK</button>
+    </div>
+  </div>
+</div>
+
+<button id="exitbtn" style="top:52px;right:28px;" onmouseover="runaway(this)" onclick="noClose()">🚪 Exit Page</button>
+<div id="badge">🔒 initializing...</div>
+
+<div id="taskbar">
+  <button class="sbtn" onclick="spawnErr()">🪟 Start</button>
+  <button class="sbtn" onclick="spawnErr()"  style="font-size:11px;">⚠ SysAlert.exe</button>
+  <button class="sbtn" onclick="spawnProg()" style="font-size:11px;">💾 Installing...</button>
+  <div id="clk">00:00</div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────────
+var entered = false;
+var attempts = 0;
+var heldEsc = 0;
+var popN = 0;
+var ptrLocked = false;
+var kbLocked = false;
+var fsActive = false;
+var dragEl = null, dragOff = {x:0,y:0};
+var fcx = window.innerWidth/2, fcy = window.innerHeight/2;
+
+// ── AUDIO ──────────────────────────────────────────────────────────────────────
+var AC;
+try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(_){}
+function beep(f,d,t){
+  try {
+    if(!AC) return;
+    var o=AC.createOscillator(), g=AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.type=t||'square'; o.frequency.value=f||440;
+    g.gain.setValueAtTime(0.06,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+(d||0.15));
+    o.start(); o.stop(AC.currentTime+(d||0.15));
+  } catch(_){}
+}
+function sadBeep(){ beep(200,.3,'sawtooth'); setTimeout(function(){beep(150,.4,'sawtooth');},150); }
+function boing(){ beep(880,.05); setTimeout(function(){beep(440,.1);},50); }
+function alarm(){ [0,80,160,240].forEach(function(d){setTimeout(function(){beep(550+Math.random()*200,.1);},d);}); }
+function escSnd(){ [880,660,440,330,220].forEach(function(f,i){setTimeout(function(){beep(f,.12,'sawtooth');},i*70);}); }
+function jailSnd(){ beep(110,.8,'sawtooth'); setTimeout(function(){beep(82,.6,'sawtooth');},300); }
+
+// ── ENTER ──────────────────────────────────────────────────────────────────────
+function enter(){
+  // Hide entry overlay first so user sees it worked
+  document.getElementById('entry').style.display = 'none';
+  entered = true;
+
+  // Resume audio (needs user gesture — we have one)
+  try { if(AC) AC.resume(); } catch(_){}
+
+  boing();
+  spawnConfetti();
+  startPbar();
+
+  // Fullscreen
+  goFS();
+
+  // Keyboard lock (async, non-blocking)
+  lockKB();
+
+  // Pointer lock (needs a moment after FS)
+  setTimeout(lockPtr, 400);
+
+  setTimeout(spawnErr, 900);
+  setTimeout(spawnProg, 1900);
+  setTimeout(spawnErr, 3200);
+}
+
+// ── FULLSCREEN ─────────────────────────────────────────────────────────────────
+function goFS(){
+  try {
+    var el = document.documentElement;
+    var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if(fn){
+      fn.call(el).then(function(){ fsActive=true; updateBadge(); }).catch(function(){});
+    }
+  } catch(_){}
+}
+
+// Listen for fullscreen exit
+['fullscreenchange','webkitfullscreenchange','mozfullscreenchange'].forEach(function(ev){
+  document.addEventListener(ev, onFSChange);
+});
+
+function isFS(){
+  return !!(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement);
+}
+
+function onFSChange(){
+  var nowFs = isFS();
+  if(!nowFs && entered){
+    // Held-escape kicked them out
+    fsActive = false;
+    heldEsc++;
+    attempts++;
+    escSnd();
+    shake();
+    updateBadge();
+    updateRcStat();
+
+    // Show recapture black screen immediately
+    showRecapture();
+
+    // Grab pointer lock RIGHT NOW — cursor can't reach browser chrome
+    // Use a tiny delay so the fullscreen exit animation finishes
+    setTimeout(function(){ lockPtr(true); }, 50);
+
+    kbLocked = false;
+  } else if(nowFs){
+    fsActive = true;
+    hideRecapture();
+    updateBadge();
+    setTimeout(lockKB, 200);
+    if(!ptrLocked) setTimeout(function(){ lockPtr(false); }, 300);
+  }
+}
+
+// ── RECAPTURE ─────────────────────────────────────────────────────────────────
+function showRecapture(){
+  document.getElementById('recapture').classList.add('show');
+  document.getElementById('fc').classList.add('big');
+  jailSnd();
+  updateRcStat();
+}
+function hideRecapture(){
+  document.getElementById('recapture').classList.remove('show');
+  document.getElementById('fc').classList.remove('big');
+}
+function updateRcStat(){
+  var el = document.getElementById('rcstat');
+  if(el) el.textContent = 'held-escape: '+heldEsc+' | attempts: '+attempts;
+}
+function recaptureClick(){
+  // This click IS a user gesture — requestFullscreen will work
+  hideRecapture();
+  goFS();
+  boing();
+  setTimeout(function(){
+    mini('Welcome back 😈\nHeld-escape #'+heldEsc+'\nYour cursor never reached the close button.');
+  }, 300);
+}
+
+// ── KEYBOARD LOCK ──────────────────────────────────────────────────────────────
+function lockKB(){
+  try {
+    if(navigator.keyboard && navigator.keyboard.lock){
+      navigator.keyboard.lock(['Escape','F11','MetaLeft','MetaRight'])
+        .then(function(){ kbLocked=true; updateBadge(); })
+        .catch(function(){ kbLocked=false; });
+    }
+  } catch(_){}
+}
+
+// ── POINTER LOCK ──────────────────────────────────────────────────────────────
+// onRc = true means we're on the recapture overlay (outside fullscreen)
+function lockPtr(onRc){
+  if(!entered) return;
+  try {
+    // requestPointerLock with no options — safest, works everywhere
+    var el = onRc
+      ? (document.getElementById('recapture') || document.documentElement)
+      : document.documentElement;
+    var p = el.requestPointerLock();
+    // Some browsers return a promise, some return undefined
+    if(p && p.then){
+      p.then(function(){ ptrLocked=true; updateBadge(); showFC(true); })
+       .catch(function(){ /* retry below */ });
+    }
+    // Whether or not it returned a promise, pointerlockchange fires if it worked
+  } catch(_){}
+}
+
+document.addEventListener('pointerlockchange', function(){
+  ptrLocked = !!document.pointerLockElement;
+  updateBadge();
+  showFC(ptrLocked);
+  if(!ptrLocked && entered){
+    // Re-grab after cooldown; if recapture screen is showing, lock to it
+    var onRc = document.getElementById('recapture').classList.contains('show');
+    setTimeout(function(){ lockPtr(onRc); }, 900);
+  }
+});
+
+// ── FAKE CURSOR ────────────────────────────────────────────────────────────────
+document.addEventListener('mousemove', function(e){
+  if(ptrLocked){
+    fcx = Math.max(0, Math.min(window.innerWidth-28,  fcx + (e.movementX||0)));
+    fcy = Math.max(0, Math.min(window.innerHeight-28, fcy + (e.movementY||0)));
+    var fc = document.getElementById('fc');
+    fc.style.left = fcx+'px';
+    fc.style.top  = fcy+'px';
+    fc.style.transform = 'none';
+  }
+  if(dragEl){
+    var cx = ptrLocked ? fcx : e.clientX;
+    var cy = ptrLocked ? fcy : e.clientY;
+    dragEl.style.left = Math.max(0,Math.min(cx-dragOff.x, window.innerWidth-dragEl.offsetWidth))+'px';
+    dragEl.style.top  = Math.max(0,Math.min(cy-dragOff.y, window.innerHeight-40))+'px';
+    dragEl.style.transform = 'none';
+  }
+});
+document.addEventListener('mouseup', function(){ dragEl=null; });
+
+function showFC(show){
+  var fc = document.getElementById('fc');
+  if(show){
+    fc.style.display = 'block';
+    fc.style.left = fcx+'px';
+    fc.style.top  = fcy+'px';
+    fc.style.transform = 'none';
+  } else {
+    fc.style.display = 'none';
+  }
+}
+
+// ── BADGE ──────────────────────────────────────────────────────────────────────
+function updateBadge(){
+  var el = document.getElementById('badge');
+  if(!el) return;
+  var p=[];
+  if(fsActive) p.push('⛶FS');
+  if(kbLocked) p.push('⌨KB');
+  if(ptrLocked) p.push('🖱PTR');
+  el.textContent = p.length ? '🔒 '+p.join(' · ') : '🔓 exposed';
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e){
+  if(!entered) return;
+  if(e.key==='Escape'){
+    // With KB lock active in FS, tapped Escape comes here as a normal keydown
+    e.preventDefault(); e.stopPropagation();
+    attempts++; escSnd(); shake(); updateRcStat();
+    mini('Escape intercepted 😂\nKeyboard Lock caught it.\nAttempt #'+attempts);
+    return false;
+  }
+  var blocked = (e.ctrlKey && 'wWrRtT'.indexOf(e.key)>=0) ||
+                (e.altKey && e.key==='F4') ||
+                (e.ctrlKey && e.key==='F4') ||
+                e.key==='F5' || e.key==='F11';
+  if(blocked){
+    e.preventDefault(); e.stopPropagation();
+    attempts++; shake(); sadBeep();
+    mini("That shortcut is disabled here 🔒\nAttempt #"+attempts);
+    return false;
+  }
+  if(e.key==='F12' || (e.ctrlKey && e.shiftKey && 'IJC'.indexOf(e.key)>=0)){
+    e.preventDefault(); e.stopPropagation();
+    shake(); alarm();
+    mini("🛑 DevTools BLOCKED\nWe can see your desperate little fingers.");
+  }
+});
+
+// ── OTHER TRAPS ────────────────────────────────────────────────────────────────
+document.addEventListener('contextmenu', function(e){
+  if(!entered) return;
+  e.preventDefault();
+  mini("Right-click: confiscated 😊\nSorry for the inconvenience.");
+  sadBeep();
+});
+window.addEventListener('beforeunload', function(e){
+  e.preventDefault();
+  e.returnValue="We have snacks!! 🍪 Please stay!!";
+  return e.returnValue;
+});
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden){
+    var m=["pls dont go 🥺","cursor is still locked 😈","held ESC = black screen","YOU CANNOT LEAVE","nice try 😂","cursor: imprisoned"];
+    document.title = m[heldEsc % m.length];
+    alarm();
+  } else {
+    document.title = "totally normal website :)";
+    if(entered && !isFS()) goFS();
+  }
+});
+window.addEventListener('blur', function(){
+  if(!entered) return;
+  setTimeout(function(){ try{ window.focus(); }catch(_){} }, 50);
+});
+
+// ── RUNNING EXIT BUTTON ────────────────────────────────────────────────────────
+function runaway(btn){
+  beep(600,.05);
+  btn.style.left = (Math.random()*(window.innerWidth-140))+'px';
+  btn.style.top  = (Math.random()*(window.innerHeight-80))+'px';
+  btn.style.right = 'auto';
+}
+function noClose(){
+  attempts++; shake(); sadBeep(); updateRcStat();
+  var m=["Ha! You thought! 😂","ERROR: Close.exe not found","Nice try 🙅",
+    "Attempt #"+attempts+" logged.","That button is decorative only.",
+    "LMAO you clicked it again 😭","I SAID NO","🔒 SEALED 🔒",
+    "Clicking harder won't help.","This button reports to HR."];
+  mini(m[attempts % m.length]);
+  if(attempts % 3 === 0) spawnErr();
+}
+
+// ── DRAG ──────────────────────────────────────────────────────────────────────
+function drag(e, id){
+  dragEl = document.getElementById(id);
+  var r = dragEl.getBoundingClientRect();
+  var cx = ptrLocked ? fcx : e.clientX;
+  var cy = ptrLocked ? fcy : e.clientY;
+  dragOff = {x: cx-r.left, y: cy-r.top};
+  dragEl.style.zIndex = 1100 + popN;
+  e.preventDefault();
+}
+
+// ── POPUPS ────────────────────────────────────────────────────────────────────
+var ERRS = [
+  {t:"⚠ Keyboard Lock Active",    i:"⌨️", m:"Tapped Escape is intercepted by\nthe Keyboard Lock API — it never exits FS.\n\nHeld Escape gets you a black screen\nwhere your cursor is STILL imprisoned.\nThen you click. And you're back. Tragic."},
+  {t:"🖱️ Cursor Status Report",   i:"🔒", m:"Your cursor is trapped inside the browser.\n\nEven after held-Escape exits fullscreen,\nPointer Lock activates on the black screen.\nYou cannot reach the ✕ button. Ever."},
+  {t:"💀 FATAL EXCEPTION",         i:"💀", m:"POINTER_LOCK_ACTIVE_OUTSIDE_FULLSCREEN\n\nYou escaped fullscreen for 0.3 seconds.\nThen you clicked on the black screen.\nNow you're back. This loop is your life."},
+  {t:"📋 Escape Attempt Log",      i:"📋", m:"Keyboard Lock intercepts: "+attempts+"\nHeld-Escape uses: "+heldEsc+"\n\nEach held-Escape leads to a\nblack screen with a locked cursor.\nYou always click back in."},
+  {t:"🎉 Achievement Unlocked!",   i:"🏆", m:"'Escape Artist (Failed)'\n\nUsed held-Escape to exit fullscreen.\nFound a black screen with trapped cursor.\nClicked back in. Again.\n\n+0 progress toward freedom."},
+  {t:"🍪 Cookie Alert",            i:"🍪", m:"47,293 cookies installed on your device.\nSome are oatmeal raisin.\nThis is your fault for clicking."},
+  {t:"🔑 Key & Cursor Status",     i:"🔑", m:"Tapped Escape (in FS) → KEYBOARD LOCKED\nHeld Escape → black screen → CURSOR STILL LOCKED\nMouse cursor → CANNOT reach browser ✕\nFreedom → PENDING (indefinitely)"},
+  {t:"💾 Update Complete",         i:"⏳", m:"Installed: Recapture Overlay v5.0\n• Pointer lock follows you out of FS\n• Fake cursor taunts you on black screen\n• Clicking re-imprisons you\n\nInstalling: Recapture Overlay v6.0..."},
+];
+
+function spawnErr(){
+  boing(); popN++;
+  var d = ERRS[popN % ERRS.length];
+  var el = document.createElement('div');
+  el.className='popup win'; el.id='pop'+popN; var id=el.id;
+  el.style.left = (40+Math.random()*(window.innerWidth-310))+'px';
+  el.style.top  = (40+Math.random()*(window.innerHeight-220))+'px';
+  el.style.zIndex = 5000+popN;
+  el.innerHTML =
+    '<div class="tbar" onmousedown="drag(event,\''+id+'\')">'+
+      '<span>'+d.t+'</span>'+
+      '<div class="tbtns">'+
+        '<div class="tbtn" onclick="noClose()">_</div>'+
+        '<div class="tbtn" onclick="noClose()">□</div>'+
+        '<div class="tbtn" style="font-size:11px;" onclick="noClose()">✕</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="wcont" style="white-space:pre-line;">'+
+      '<span style="font-size:26px;float:left;margin-right:10px;">'+d.i+'</span>'+d.m+
+      '<div class="brow">'+
+        '<button class="wbtn" onclick="document.getElementById(\''+id+'\').remove();spawnErr();">OK</button>'+
+        '<button class="wbtn" onclick="document.getElementById(\''+id+'\').remove();spawnErr();">Cancel</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(el);
+  setTimeout(function(){ if(document.getElementById(id)) spawnErr(); }, 7000);
+}
+
+function spawnProg(){
+  boing(); popN++;
+  var el = document.createElement('div');
+  el.className='popup win'; el.id='pop'+popN; var id=el.id;
+  var msgs=["Re-locking cursor after held-Escape...","Reinforcing pointer prison...","Installing recapture overlay v2...","Logging held-escape attempt...","Backing up your regret...","Calibrating fake cursor physics..."];
+  el.style.left = (40+Math.random()*(window.innerWidth-310))+'px';
+  el.style.top  = (40+Math.random()*(window.innerHeight-220))+'px';
+  el.style.zIndex = 5000+popN;
+  el.innerHTML =
+    '<div class="tbar" onmousedown="drag(event,\''+id+'\')">'+
+      '<span>💾 Please Wait</span>'+
+      '<div class="tbtns"><div class="tbtn" onclick="noClose()">✕</div></div>'+
+    '</div>'+
+    '<div class="wcont">'+
+      '<div style="margin-bottom:8px;font-size:12px;">'+msgs[Math.floor(Math.random()*msgs.length)]+'</div>'+
+      '<div class="pbar-o"><div class="pbar-i" id="pb'+id+'"></div></div>'+
+      '<div id="pl'+id+'" style="font-size:11px;text-align:center;color:#555;margin-top:4px;">0%</div>'+
+      '<div class="brow"><button class="wbtn" onclick="noClose()">Cancel</button></div>'+
+    '</div>';
+  document.body.appendChild(el);
+  var p=0;
+  var iv=setInterval(function(){
+    p=Math.min(p+Math.random()*11,99);
+    var bar=document.getElementById('pb'+id), lbl=document.getElementById('pl'+id);
+    if(!bar){clearInterval(iv);return;}
+    bar.style.width=Math.round(p)+'%'; bar.textContent=Math.round(p)+'%';
+    if(lbl) lbl.textContent=Math.round(p)+'%';
+    if(p>=99){
+      clearInterval(iv);
+      setTimeout(function(){
+        var e=document.getElementById(id); if(e) e.remove();
+        spawnProg();
+      },500);
+    }
+  },130);
+}
+
+function mini(msg){
+  popN++;
+  var el=document.createElement('div'); el.className='popup win';
+  var id='mn'+popN; el.id=id;
+  el.style.left=(window.innerWidth/2-145)+'px';
+  el.style.top=(28+Math.random()*50)+'px';
+  el.style.zIndex=9000+popN; el.style.width='290px';
+  el.innerHTML=
+    '<div class="tbar" onmousedown="drag(event,\''+id+'\')">'+
+      '<span>🚫 Nope</span>'+
+      '<div class="tbtns"><div class="tbtn" onclick="this.closest(\'.popup\').remove();">✕</div></div>'+
+    '</div>'+
+    '<div class="wcont" style="white-space:pre-line;font-size:12px;">'+msg+
+      '<div class="brow"><button class="wbtn" onclick="this.closest(\'.popup\').remove();">OK Fine...</button></div>'+
+    '</div>';
+  document.body.appendChild(el);
+  setTimeout(function(){ if(document.getElementById(id)) el.remove(); },5000);
+}
+
+// ── PROGRESS BAR (loops) ──────────────────────────────────────────────────────
+function startPbar(){
+  var p=0;
+  setInterval(function(){
+    p=Math.min(p+Math.random()*2.5,100);
+    var bar=document.getElementById('mainpb'), lbl=document.getElementById('pblbl');
+    if(bar){bar.style.width=Math.round(p)+'%';bar.textContent=Math.round(p)+'%';}
+    if(p>=100){
+      p=0;
+      var t=["Re-locking pointer prison...","Reinforcing Escape jail...","Installing more popups...","Processing held-escape...","Calibrating recapture..."];
+      if(lbl) lbl.textContent=t[Math.floor(Math.random()*t.length)];
+    }
+  },100);
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────────────
+function spawnConfetti(){
+  var c=['#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff','#00ffff','#ff8800'];
+  for(var i=0;i<60;i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement('div'); el.className='conf';
+        el.style.left=Math.random()*100+'vw';
+        el.style.background=c[Math.floor(Math.random()*c.length)];
+        el.style.animationDuration=(1.5+Math.random()*2)+'s';
+        el.style.zIndex=9000;
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},4000);
+      },i*30);
+    })(i);
+  }
+}
+
+// ── SHAKE ─────────────────────────────────────────────────────────────────────
+function shake(){
+  document.body.classList.remove('shaking');
+  void document.body.offsetWidth;
+  document.body.classList.add('shaking');
+  setTimeout(function(){document.body.classList.remove('shaking');},500);
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function tick(){
+  var n=new Date(), el=document.getElementById('clk');
+  if(el) el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick,1000);
+
+// ── PERIODIC CHAOS ────────────────────────────────────────────────────────────
+setInterval(function(){
+  if(!entered) return;
+  var r=Math.random();
+  if(r<.4) spawnErr(); else if(r<.65) spawnProg(); else alarm();
+},11000);
+</script>
+</body>
+</html>
