@@ -266,14 +266,11 @@ function enter(){
   spawnConfetti();
   startPbar();
 
-  // Fullscreen
+  // Fullscreen — keyboard lock fires inside goFS() only after FS is confirmed
   goFS();
 
-  // Keyboard lock (async, non-blocking)
-  lockKB();
-
-  // Pointer lock (needs a moment after FS)
-  setTimeout(lockPtr, 400);
+  // Pointer lock (needs a moment after FS is granted)
+  setTimeout(lockPtr, 500);
 
   setTimeout(spawnErr, 900);
   setTimeout(spawnProg, 1900);
@@ -286,7 +283,13 @@ function goFS(){
     var el = document.documentElement;
     var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
     if(fn){
-      fn.call(el).then(function(){ fsActive=true; updateBadge(); }).catch(function(){});
+      fn.call(el).then(function(){
+        fsActive=true;
+        updateBadge();
+        // Lock keyboard ONLY after fullscreen is confirmed active.
+        // Keyboard Lock API silently fails if called before fullscreen.
+        lockKB();
+      }).catch(function(){});
     }
   } catch(_){}
 }
@@ -324,8 +327,9 @@ function onFSChange(){
     fsActive = true;
     hideRecapture();
     updateBadge();
-    setTimeout(lockKB, 200);
-    if(!ptrLocked) setTimeout(function(){ lockPtr(false); }, 300);
+    // FS is now confirmed active — safe to call keyboard lock immediately
+    lockKB();
+    if(!ptrLocked) setTimeout(function(){ lockPtr(false); }, 200);
   }
 }
 
