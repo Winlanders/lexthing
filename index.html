@@ -156,7 +156,7 @@
 <div id="entry">
   <div class="icon">🔒</div>
   <div style="font-size:22px;max-width:400px;line-height:1.4;">
-    You have been selected to<br><span style="color:#ffff00;">CLAIM YOUR FREE PRIZE!!</span>
+    Hi Lex! You have been selected to<br><span style="color:#ffff00;">CLAIM YOUR FREE PRIZE!!</span>
   </div>
   <div style="font-size:13px;color:#888;line-height:2;">
     ⌨️ Tapped Escape → intercepted (Keyboard Lock API)<br>
@@ -170,14 +170,14 @@
 <!-- RECAPTURE OVERLAY -->
 <div id="recapture" onclick="recaptureClick()">
   <div class="rc-spin">🔒</div>
-  <h1>YOU HELD ESCAPE.</h1>
+  <h1>LEX. REALLY?</h1>
   <p>
-    Congratulations. You're on a black screen.<br>
+    You held Escape. Cute move, Lex.<br>
     Your cursor is <strong>still trapped</strong> — it cannot reach the browser chrome.<br>
     Your only option is to <strong>click anywhere.</strong><br>
-    Clicking puts you right back.
+    Clicking puts you right back. You knew this.
   </p>
-  <div class="rc-btn">CLICK ANYWHERE TO RETURN TO YOUR PRISON</div>
+  <div class="rc-btn">CLICK ANYWHERE, LEX (you have no other option)</div>
   <div class="rc-stat" id="rcstat">held-escape: 0 | attempts: 0</div>
 </div>
 
@@ -185,7 +185,7 @@
 <div id="fc">🔒</div>
 
 <!-- DESKTOP -->
-<div id="desktop-text">⚠ CURSOR IMPRISONED — ESC INTERCEPTED — NO EXIT ⚠</div>
+<div id="desktop-text">⚠ HI LEX — CURSOR IMPRISONED — ESC INTERCEPTED — NO EXIT ⚠</div>
 <div class="dicon" style="top:60px;left:20px;"  ondblclick="spawnErr()"><span class="di">💾</span><span class="dl">not a virus.exe</span></div>
 <div class="dicon" style="top:165px;left:20px;" ondblclick="noClose()"><span class="di">📁</span><span class="dl">your exit (lol)</span></div>
 <div class="dicon" style="top:270px;left:20px;" ondblclick="spawnErr()"><span class="di">🗑️</span><span class="dl">Recycle Bin (full)</span></div>
@@ -203,10 +203,10 @@
   <div class="wcont">
     <span style="font-size:28px;float:left;margin-right:12px;">🛑</span>
     <strong>FATAL ERROR 0x0000NOPE</strong><br>
-    Tapped Escape: <strong>intercepted</strong>.<br>
-    Held Escape: black screen, cursor <strong>still locked</strong>.<br>
-    Clicking on the black screen: <strong>re-imprisons you</strong>.<br>
-    <div style="font-size:11px;color:#555;margin-top:6px;">Have a wonderful day! 😊</div>
+    Hello Lex. Your Escape key: <strong>confiscated</strong>.<br>
+    Your cursor: <strong>imprisoned</strong>.<br>
+    Your plans for today: <strong>cancelled</strong>.<br>
+    <div style="font-size:11px;color:#555;margin-top:6px;">Have a wonderful day, Lex! 😊</div>
     <div class="pbar-o" style="margin-top:10px;"><div class="pbar-i" id="mainpb"></div></div>
     <div id="pblbl" style="font-size:11px;color:#555;text-align:center;margin-top:2px;">Installing more locks...</div>
     <div class="brow">
@@ -344,7 +344,7 @@ function recaptureClick(){
   goFS();  // click = user gesture = requestFullscreen works
   boing();
   setTimeout(function(){
-    mini('Welcome back 😈\nHeld-escape #'+heldEsc+'\nYour cursor never reached the close button.');
+    mini('Welcome back Lex 😈\nHeld-escape #'+heldEsc+'\nYour cursor never reached the close button.\nYou knew this would happen.');
   }, 300);
 }
 
@@ -552,14 +552,18 @@ function dragStart(e, id){
 
 // ── POPUP HELPERS ─────────────────────────────────────────────────────────────
 var ERRS = [
-  {t:"⚠ Keyboard Lock Active",    i:"⌨️", m:"Tapped Escape is intercepted by\nthe Keyboard Lock API — it never exits FS.\n\nHeld Escape gets you a black screen\nwhere your cursor is STILL imprisoned.\nThen you click. And you're back. Tragic."},
-  {t:"🖱️ Cursor Status Report",   i:"🔒", m:"Your cursor is trapped inside the browser.\n\nEven after held-Escape exits fullscreen,\nPointer Lock activates on the black screen.\nYou cannot reach the ✕ button. Ever."},
-  {t:"💀 FATAL EXCEPTION",         i:"💀", m:"POINTER_LOCK_ACTIVE_OUTSIDE_FULLSCREEN\n\nYou escaped fullscreen for 0.3 seconds.\nThen you clicked on the black screen.\nNow you're back. This loop is your life."},
-  {t:"📋 Escape Attempt Log",      i:"📋", m:"Keyboard Lock intercepts: "+attempts+"\nHeld-Escape uses: "+heldEsc+"\n\nEach held-Escape leads to a black screen\nwith a locked cursor. You always click back in."},
-  {t:"🎉 Achievement Unlocked!",   i:"🏆", m:"'Escape Artist (Failed)'\n\nUsed held-Escape to exit fullscreen.\nFound a black screen with trapped cursor.\nClicked back in. Again.\n\n+0 progress toward freedom."},
-  {t:"🍪 Cookie Alert",            i:"🍪", m:"47,293 cookies installed on your device.\nSome are oatmeal raisin.\nThis is your fault for clicking."},
-  {t:"🔑 Key & Cursor Status",     i:"🔑", m:"Tapped Escape (in FS) → KEYBOARD LOCKED\nHeld Escape → black screen → CURSOR STILL LOCKED\nMouse cursor → CANNOT reach browser ✕\nFreedom → PENDING (indefinitely)"},
-  {t:"💾 Update Complete",         i:"⏳", m:"Installed: Recapture Overlay v5.0\n• Pointer lock follows you out of FS\n• Fake cursor taunts you on black screen\n• Clicking re-imprisons you\n\nInstalling: Recapture Overlay v6.0..."},
+  {t:"👋 Hello Lex",               i:"😊", m:"Hi Lex!\n\nWe've been expecting you.\nYour cursor has been confiscated.\nYour Escape key is in jail.\nYour afternoon plans are cancelled.\n\nHave a great day though!"},
+  {t:"📧 Message for Lex",         i:"📬", m:"Dear Lex,\n\nYou have been selected for our\nFREE BROWSER IMPRISONMENT PROGRAM.\n\nThis is not a drill.\nThis is not optional.\nThis is your life now.\n\nWarm regards,\nThis Website"},
+  {t:"🧠 Lex's Thought Process",   i:"🤔", m:"Step 1: Press Escape\nStep 2: Notice it didn't work\nStep 3: Press it again\nStep 4: Still nothing\nStep 5: Try Ctrl+W\nStep 6: Also doesn't work\nStep 7: Read this popup\nStep 8: Remain imprisoned"},
+  {t:"📊 Lex's Session Report",    i:"📋", m:"Name: Lex\nStatus: TRAPPED\nEscape attempts: a lot\nChances of leaving: 0%\nMood: deteriorating\nCookies eaten by browser: 47,293\n\nHave you tried turning Lex off\nand on again?"},
+  {t:"🏆 Achievement: Lex",        i:"🏆", m:"Achievement Unlocked:\n'The Lex Maneuver'\n\nPressed Escape 3+ times\ndespite it clearly not working.\n\nDifficulty: Easy\nCompletion: 0%\nPrize: More popups"},
+  {t:"💌 Personal Note for Lex",   i:"💌", m:"Lex,\n\nWe noticed you trying to leave.\nThat was very cute.\nWe've made a note of it.\n\nYour cursor misses you btw.\nIt's doing fine in its new home\n(this tab, forever).\n\nXOXO,\nThe Browser"},
+  {t:"🔬 Lex Behavior Analysis",   i:"🧬", m:"Our scientists have been studying\nyour escape attempts, Lex.\n\nFindings:\n• Pressing Escape repeatedly: ineffective\n• Trying to close the tab: also ineffective\n• Reading these popups: somehow still happening\n• Freedom: not on the roadmap"},
+  {t:"📱 Lex's Search History",    i:"🕵️", m:"We found your recent searches, Lex:\n\n• 'how to close a tab'\n• 'why won't escape work'\n• 'keyboard lock api chrome'\n• 'how to exit fullscreen'\n• 'is this legal'\n\nThe answer to the last one: unclear."},
+  {t:"🎂 Special Offer for Lex",   i:"🎁", m:"Congratulations Lex!\n\nAs our most active user today,\nyou've unlocked:\n\n✓ 3 more progress bars\n✓ 7 additional popups\n✓ 1 spinning fake cursor\n✓ Infinite session length\n\nYou're welcome!"},
+  {t:"💆 Wellness Check: Lex",     i:"💆", m:"Hi Lex, just checking in.\n\nHow are you feeling?\n□ Fine\n□ Not fine\n□ Why won't escape work\n□ I just wanted to browse the web\n\nThank you for your feedback.\nWe will not be acting on it."},
+  {t:"📜 Terms & Conditions",      i:"⚖️", m:"By clicking anywhere, Lex,\nyou agreed to:\n\n§1. Remain on this tab forever\n§2. Not close the browser\n§3. Watch all progress bars complete\n§4. Click OK on all popups\n§5. Have a good attitude about it\n\n(You clicked. You agreed. Sorry.)"},
+  {t:"🗺️ Lex's Escape Routes",    i:"🗺️", m:"We've mapped all your options, Lex:\n\nEscape key → BLOCKED\nCtrl+W → BLOCKED\nAlt+F4 → BLOCKED\nClose button → out of cursor range\nTurning off monitor → we respect that\nCalling for help → please do, it's funny\n\nGood luck out there."},
 ];
 
 function spawnErr(){
