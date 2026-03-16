@@ -51,6 +51,28 @@
   }
   #recapture .rc-stat{font-size:11px;color:#444;font-family:monospace;margin-top:4px;}
 
+  #recapture .glitch1{
+    position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,0,0,0.03) 2px,rgba(255,0,0,0.03) 4px);
+    animation:scanline 8s linear infinite;
+  }
+  @keyframes scanline{from{background-position:0 0}to{background-position:0 200%}}
+  #recapture .glitch2{
+    position:absolute;inset:0;pointer-events:none;
+    animation:glitchflash .15s step-end infinite;
+  }
+  @keyframes glitchflash{
+    0%,91%,94%,98%,100%{background:transparent}
+    92%,93%{background:rgba(255,0,0,0.05)}
+    96%,97%{background:rgba(0,255,255,0.04)}
+  }
+  #recapture.show ~ #fc, #fc.big{display:block !important;}
+  /* hide the real cursor while recapture is showing */
+  body.on-recapture, body.on-recapture *{cursor:none !important;}
+  @keyframes fcpulse{from{transform:scale(1) rotate(-5deg)}to{transform:scale(1.4) rotate(5deg)}}
+  .rc-arrow{position:absolute;font-size:26px;animation:arrowblink .35s step-end infinite;pointer-events:none;}
+  @keyframes arrowblink{50%{opacity:0}}
+
   /* ── FAKE CURSOR ── */
   #fc{
     position:fixed;font-size:22px;pointer-events:none;
@@ -156,7 +178,7 @@
 <div id="entry">
   <div class="icon">🔒</div>
   <div style="font-size:22px;max-width:400px;line-height:1.4;">
-    Hi Lex! You have been selected to<br><span style="color:#ffff00;">CLAIM YOUR FREE PRIZE!!</span>
+    You have been selected to<br><span style="color:#ffff00;">CLAIM YOUR FREE PRIZE!!</span>
   </div>
   <div style="font-size:13px;color:#888;line-height:2;">
     ⌨️ Tapped Escape → intercepted (Keyboard Lock API)<br>
@@ -169,15 +191,24 @@
 
 <!-- RECAPTURE OVERLAY -->
 <div id="recapture" onclick="recaptureClick()">
+  <div class="glitch1"></div>
+  <div class="glitch2"></div>
+
+  <!-- arrows pointing inward from all corners -->
+  <div class="rc-arrow" style="top:12px;left:12px;">↘</div>
+  <div class="rc-arrow" style="top:12px;right:12px;">↙</div>
+  <div class="rc-arrow" style="bottom:48px;left:12px;">↗</div>
+  <div class="rc-arrow" style="bottom:48px;right:12px;">↖</div>
+  <div class="rc-arrow" style="top:50%;left:12px;transform:translateY(-50%);">→</div>
+  <div class="rc-arrow" style="top:50%;right:12px;transform:translateY(-50%);">←</div>
+
   <div class="rc-spin">🔒</div>
-  <h1>LEX. REALLY?</h1>
+  <h1>REALLY?</h1>
   <p>
-    You held Escape. Cute move, Lex.<br>
     Your cursor is <strong>still trapped</strong> — it cannot reach the browser chrome.<br>
-    Your only option is to <strong>click anywhere.</strong><br>
-    Clicking puts you right back. You knew this.
+    <strong>Click anywhere to continue.</strong> That is your only option.
   </p>
-  <div class="rc-btn">CLICK ANYWHERE, LEX (you have no other option)</div>
+  <div class="rc-btn">⚠ YOUR CURSOR IS IMPRISONED — CLICK TO CONFIRM ⚠</div>
   <div class="rc-stat" id="rcstat">held-escape: 0 | attempts: 0</div>
 </div>
 
@@ -185,7 +216,7 @@
 <div id="fc">🔒</div>
 
 <!-- DESKTOP -->
-<div id="desktop-text">⚠ HI LEX — CURSOR IMPRISONED — ESC INTERCEPTED — NO EXIT ⚠</div>
+<div id="desktop-text">⚠ CURSOR IMPRISONED — ESC INTERCEPTED — NO EXIT ⚠</div>
 <div class="dicon" style="top:60px;left:20px;"  ondblclick="spawnErr()"><span class="di">💾</span><span class="dl">not a virus.exe</span></div>
 <div class="dicon" style="top:165px;left:20px;" ondblclick="noClose()"><span class="di">📁</span><span class="dl">your exit (lol)</span></div>
 <div class="dicon" style="top:270px;left:20px;" ondblclick="spawnErr()"><span class="di">🗑️</span><span class="dl">Recycle Bin (full)</span></div>
@@ -203,10 +234,10 @@
   <div class="wcont">
     <span style="font-size:28px;float:left;margin-right:12px;">🛑</span>
     <strong>FATAL ERROR 0x0000NOPE</strong><br>
-    Hello Lex. Your Escape key: <strong>confiscated</strong>.<br>
+    Your Escape key: <strong>confiscated</strong>.<br>
     Your cursor: <strong>imprisoned</strong>.<br>
     Your plans for today: <strong>cancelled</strong>.<br>
-    <div style="font-size:11px;color:#555;margin-top:6px;">Have a wonderful day, Lex! 😊</div>
+    <div style="font-size:11px;color:#555;margin-top:6px;">Have a wonderful day! 😊 😊</div>
     <div class="pbar-o" style="margin-top:10px;"><div class="pbar-i" id="mainpb"></div></div>
     <div id="pblbl" style="font-size:11px;color:#555;text-align:center;margin-top:2px;">Installing more locks...</div>
     <div class="brow">
@@ -325,15 +356,27 @@ function onFSChange(){
 }
 
 // ── RECAPTURE ─────────────────────────────────────────────────────────────────
+var rcShakeInterval = null;
+
 function showRecapture(){
   document.getElementById('recapture').classList.add('show');
   document.getElementById('fc').classList.add('big');
+  document.getElementById('fc').style.display = 'block';
+  document.body.classList.add('on-recapture');
   jailSnd();
   updateRcStat();
+  rcShakeInterval = setInterval(function(){
+    var rc = document.getElementById('recapture');
+    if(!rc.classList.contains('show')){ clearInterval(rcShakeInterval); return; }
+    shake();
+    alarm();
+  }, 1800);
 }
 function hideRecapture(){
   document.getElementById('recapture').classList.remove('show');
   document.getElementById('fc').classList.remove('big');
+  document.body.classList.remove('on-recapture');
+  clearInterval(rcShakeInterval);
 }
 function updateRcStat(){
   var el = document.getElementById('rcstat');
@@ -344,7 +387,7 @@ function recaptureClick(){
   goFS();  // click = user gesture = requestFullscreen works
   boing();
   setTimeout(function(){
-    mini('Welcome back Lex 😈\nHeld-escape #'+heldEsc+'\nYour cursor never reached the close button.\nYou knew this would happen.');
+    mini('Welcome back 😈\nHeld-escape #'+heldEsc+'\nYour cursor never reached the close button.\nYou knew this would happen.');
   }, 300);
 }
 
@@ -392,11 +435,23 @@ document.addEventListener('mousemove', function(e){
   if(ptrLocked){
     fcx = Math.max(0, Math.min(window.innerWidth-28,  fcx + (e.movementX||0)));
     fcy = Math.max(0, Math.min(window.innerHeight-28, fcy + (e.movementY||0)));
-    var fc = document.getElementById('fc');
-    fc.style.left = fcx+'px';
-    fc.style.top  = fcy+'px';
-    fc.style.transform = 'none';
+  } else if(document.getElementById('recapture').classList.contains('show')){
+    // On recapture screen: mirror/reverse the real cursor position with extra sensitivity
+    // Real cursor at top → fake cursor shoots to bottom faster than expected
+    var sens = 2.5;
+    var cx = e.clientX - window.innerWidth/2;
+    var cy = e.clientY - window.innerHeight/2;
+    fcx = Math.max(0, Math.min(window.innerWidth-28,  window.innerWidth/2  - cx * sens));
+    fcy = Math.max(0, Math.min(window.innerHeight-28, window.innerHeight/2 - cy * sens));
+  } else {
+    fcx = e.clientX;
+    fcy = e.clientY;
   }
+  var fc = document.getElementById('fc');
+  fc.style.left = fcx+'px';
+  fc.style.top  = fcy+'px';
+  fc.style.transform = 'none';
+
   // Dragging
   if(dragEl){
     var cx = ptrLocked ? fcx : e.clientX;
@@ -552,47 +607,47 @@ function dragStart(e, id){
 
 // ── POPUP HELPERS ─────────────────────────────────────────────────────────────
 var ERRS = [
-  {t:"👋 Hello Lex",               i:"😊", m:"Hi Lex!\n\nWe've been expecting you.\nYour cursor has been confiscated.\nYour Escape key is in jail.\nYour afternoon plans are cancelled.\n\nHave a great day though!"},
-  {t:"📧 Message for Lex",         i:"📬", m:"Dear Lex,\n\nYou have been selected for our\nFREE BROWSER IMPRISONMENT PROGRAM.\n\nThis is not a drill.\nThis is not optional.\nThis is your life now.\n\nWarm regards,\nThis Website"},
-  {t:"🧠 Lex's Thought Process",   i:"🤔", m:"Step 1: Press Escape\nStep 2: Notice it didn't work\nStep 3: Press it again\nStep 4: Still nothing\nStep 5: Try Ctrl+W\nStep 6: Also doesn't work\nStep 7: Read this popup\nStep 8: Remain imprisoned"},
-  {t:"📊 Lex's Session Report",    i:"📋", m:"Name: Lex\nStatus: TRAPPED\nEscape attempts: a lot\nChances of leaving: 0%\nMood: deteriorating\nCookies eaten by browser: 47,293\n\nHave you tried turning Lex off\nand on again?"},
-  {t:"🏆 Achievement: Lex",        i:"🏆", m:"Achievement Unlocked:\n'The Lex Maneuver'\n\nPressed Escape 3+ times\ndespite it clearly not working.\n\nDifficulty: Easy\nCompletion: 0%\nPrize: More popups"},
-  {t:"💌 Personal Note for Lex",   i:"💌", m:"Lex,\n\nWe noticed you trying to leave.\nThat was very cute.\nWe've made a note of it.\n\nYour cursor misses you btw.\nIt's doing fine in its new home\n(this tab, forever).\n\nXOXO,\nThe Browser"},
-  {t:"🔬 Lex Behavior Analysis",   i:"🧬", m:"Our scientists have been studying\nyour escape attempts, Lex.\n\nFindings:\n• Pressing Escape repeatedly: ineffective\n• Trying to close the tab: also ineffective\n• Reading these popups: somehow still happening\n• Freedom: not on the roadmap"},
-  {t:"📱 Lex's Search History",    i:"🕵️", m:"We found your recent searches, Lex:\n\n• 'how to close a tab'\n• 'why won't escape work'\n• 'keyboard lock api chrome'\n• 'how to exit fullscreen'\n• 'is this legal'\n\nThe answer to the last one: unclear."},
-  {t:"🎂 Special Offer for Lex",   i:"🎁", m:"Congratulations Lex!\n\nAs our most active user today,\nyou've unlocked:\n\n✓ 3 more progress bars\n✓ 7 additional popups\n✓ 1 spinning fake cursor\n✓ Infinite session length\n\nYou're welcome!"},
-  {t:"💆 Wellness Check: Lex",     i:"💆", m:"Hi Lex, just checking in.\n\nHow are you feeling?\n□ Fine\n□ Not fine\n□ Why won't escape work\n□ I just wanted to browse the web\n\nThank you for your feedback.\nWe will not be acting on it."},
-  {t:"📜 Terms & Conditions",      i:"⚖️", m:"By clicking anywhere, Lex,\nyou agreed to:\n\n§1. Remain on this tab forever\n§2. Not close the browser\n§3. Watch all progress bars complete\n§4. Click OK on all popups\n§5. Have a good attitude about it\n\n(You clicked. You agreed. Sorry.)"},
-  {t:"🗺️ Lex's Escape Routes",    i:"🗺️", m:"We've mapped all your options, Lex:\n\nEscape key → BLOCKED\nCtrl+W → BLOCKED\nAlt+F4 → BLOCKED\nClose button → out of cursor range\nTurning off monitor → we respect that\nCalling for help → please do, it's funny\n\nGood luck out there."},
-  {t:"⏰ Time Update for Lex",     i:"⏰", m:"Hi Lex!\n\nJust letting you know that while\nyou've been on this tab,:\n\n• 3 people texted you back\n• Your food got cold\n• The meeting started\n• Someone ate your lunch\n\nWe're sure it's fine."},
-  {t:"🧾 Invoice for Lex",         i:"💸", m:"INVOICE #000001\nBill To: Lex\n\nItem: Browser Imprisonment (1 session)\nDuration: ongoing\nRate: your entire afternoon\nSubtotal: your sanity\nTax: also your sanity\nTotal: your sanity\n\nPayment due: immediately.\nThank you for your business."},
-  {t:"🐦 Tweet from @LexBrowser",  i:"🐦", m:"@LexBrowser tweeted:\n\n'day 1 on this website. cursor is\nmissing. escape key does nothing.\nprogress bars are lying to me.\nfeeling great actually. very normal\nbrowsing experience. 10/10'\n\n47 likes. 3 retweets. 0 escapes."},
-  {t:"📰 Breaking News",           i:"📰", m:"BREAKING: Local Person 'Lex'\nAttempts To Close Browser Tab\n\nAuthorities report the attempt\nwas unsuccessful. Sources close\nto the situation say Lex pressed\nEscape 'a concerning number of times.'\n\nDeveloping story. Updates to follow."},
-  {t:"🤝 LinkedIn Update",         i:"💼", m:"Lex is open to opportunities!\n\nSkills:\n• Pressing Escape repeatedly\n• Reading popup windows\n• Remaining calm under imprisonment\n• Watching progress bars (advanced)\n\n'Open to work' status: yes, on leaving\nthis tab. No offers yet."},
-  {t:"🍕 Lex's Dinner Reservation", i:"🍽️", m:"Reminder: Lex, you have a\nreservation at 7:30pm.\n\nUnfortunately your cursor cannot\nreach the calendar app.\n\nYour table will be held for\n15 minutes. After that we're\ngiving it to someone who can\nactually close a browser tab."},
-  {t:"📦 Package Update for Lex",  i:"📦", m:"Hi Lex! Your package is:\n\nOut for delivery ✓\nArrived at your door ✓\nLeft in the rain ✓\nSomeone else took it ✓\n\nWe tried to notify you but\nyou were busy pressing Escape.\nStatus: gone. Have a nice day!"},
-  {t:"🏋️ Lex's Fitness Reminder",  i:"🏋️", m:"Hey Lex! Time to work out!\n\nToday's routine:\n• 3 sets of pressing Escape\n• 12 reps of clicking Cancel\n• 1 mile of cursor dragging\n• Cool down: reading this popup\n\nCalories burned: 0\nEscape attempts: still not working"},
-  {t:"🌡️ Lex's Vibe Check",        i:"🌡️", m:"VIBE CHECK RESULTS FOR LEX:\n\nCurrent vibe: imprisoned\nEscape energy: blocked\nMouse cursor: not yours anymore\nKeyboard: partially confiscated\nAfternoon plans: cancelled\nOverall score: 2/10\n\nWe recommend staying hydrated."},
-  {t:"🧁 Lex's Horoscope",         i:"⭐", m:"SCORPIO (or whatever you are, Lex):\n\nToday is NOT a good day for travel.\nYour cursor will face obstacles.\nA mysterious popup will appear.\n(This one. Hi.)\n\nLucky numbers: 0 (escape attempts\nthat worked)\nUnlucky numbers: all of them"},
-  {t:"📡 Signal Update",           i:"📡", m:"LEX — TRANSMISSION RECEIVED:\n\n'We have your cursor. It is safe.\nIt misses you. It cannot come home.\nIt lives in the pointer lock now.\nIt has made peace with this.\n\nPlease stop pressing Escape.\nIt doesn't work.\nWe've told you this already.'\n\n— The Browser"},
-  {t:"🎓 Certificate for Lex",     i:"🎓", m:"This certifies that\n\nLEX\n\nhas successfully completed:\n\n'Introduction to Being Trapped\nIn a Browser Tab'\n\nWith a score of: 0% escaped\nHonors: none\nCredits earned: none\nTime wasted: yes\n\nCongratulations, Lex!"},
-  {t:"😤 Complaint Department",    i:"📮", m:"Thank you for your complaint, Lex.\n\nWe have received your:\n□ Repeated Escape key presses\n□ Attempted Ctrl+W\n□ Visible frustration\n□ Glaring at the screen\n\nYour feedback is important to us.\nWe will not be changing anything.\nEstimated resolution time: never."},
-  {t:"🧩 Fun Fact for Lex",        i:"🧩", m:"FUN FACT:\n\nThe Escape key was originally\ndesigned to let users cancel\nan unwanted operation.\n\nIronic, isn't it, Lex?\n\nAnyway. You're still here.\nThe Escape key still doesn't work.\nHope you found that interesting!"},
-  {t:"🪄 Magic Trick",             i:"🪄", m:"Watch closely, Lex!\n\nI'm going to make your\nfreedom... disappear! 🪄\n\n*waves hands*\n\nTa-da! It's gone!\n\nFor my next trick I'll make\nyour cursor reappear...\nJust kidding. It stays imprisoned.\n\nThank you, you've been a great audience."},
-  {t:"🤖 AI Assessment: Lex",      i:"🤖", m:"ANALYZING USER: LEX\n\nBehavior pattern: pressing Escape\nResult: ineffective\nLearning from failure: not yet\nAdapting strategy: not observed\nNew approach attempted: no\nStill pressing Escape: yes\n\nConclusion: Lex is trying their best.\nWe respect that. It won't help."},
-  {t:"📻 Radio Message for Lex",   i:"📻", m:"This one goes out to Lex,\nwho's been trapped in a browser\ntab since they clicked that button.\n\nThis is 'Escape' by Rupert Holmes.\nHeh. Escape. Get it, Lex?\n\nRequested by: this website\nDedicated to: Lex, specifically\nETA to freedom: unknown"},
-  {t:"🧸 Emotional Support",       i:"🧸", m:"Hey Lex.\n\nWe know this is hard.\nWe see you pressing Escape.\nWe see you trying.\nIt's not working, but we see it.\n\nHere is a virtual hug 🤗\n\nThe hug will not help you escape.\nBut we hope it helps a little.\nYou're doing great, Lex. (You're not.)"},
-  {t:"🗳️ Vote: Lex's Freedom",    i:"🗳️", m:"POLL: Should Lex be freed?\n\n□ Yes, release Lex immediately\n□ No, Lex stays\n□ Maybe, but not right now\n□ What's a Lex\n\nResults so far:\nYes: 0 votes\nNo: 47,293 votes\nMaybe: 0 votes\nWhat's a Lex: 1 vote (suspicious)"},
-  {t:"📖 Lex: A Biography",        i:"📖", m:"Chapter 47: The Tab\n\n'It was a normal afternoon when Lex\nclicked the button. What followed\nwas a series of Escape key presses,\neach one more hopeful than the last,\nand each one equally useless.'\n\n— 'Trapped: The Lex Story'\nAvailable nowhere. About Lex."},
-  {t:"🎬 Movie Pitch",             i:"🎬", m:"COMING SOON:\n\n'THE TAB'\nStarring: Lex\nDirected by: This Website\n\nOne person. One browser tab.\nZero working Escape keys.\n\nRated PG-13 for: mild frustration,\ncursor imprisonment, and one\nvery stubborn progress bar.\n\n'I cried' — Lex, probably"},
-  {t:"🧑‍⚖️ Legal Notice for Lex",  i:"⚖️", m:"NOTICE TO: Lex\nFROM: This Website Legal Dept.\n\nYour repeated Escape key presses\nconstitute an 'unauthorized exit\nattempt' under Section 4(b) of\nthe Terms you agreed to by clicking.\n\nDamages sought: your entire afternoon.\nCountersuit options: none.\nHave a lovely day."},
-  {t:"🌍 Fun Geography: Lex",      i:"🌍", m:"Did you know, Lex, that somewhere\nin the world right now, someone\nis successfully closing a browser tab?\n\nThey just did it. Just now.\nSo easy for them.\n\nAnyway. You're still here.\nYour cursor is still locked.\nJust a fun geography fact for you."},
-  {t:"🔋 Lex's Battery Report",    i:"🔋", m:"DEVICE STATUS FOR LEX:\n\nEscape key battery: depleted\nPatience battery: critical (4%)\nCursor battery: imprisoned, N/A\nHope battery: draining\nProgress bar: 99%... still 99%\n\nRecommendation: plug in.\nAlternate recommendation: stay.\nYou're staying. We know."},
-  {t:"📸 Photo Memories",          i:"📸", m:"On this day last year, Lex,\nyou could close browser tabs freely.\n\nLook how happy you were.\nLook at that unrestricted cursor.\nThat beautiful working Escape key.\n\nWe don't have an actual photo.\nBut you remember, don't you Lex?\nSimpler times."},
-  {t:"🎮 Game Over: Lex",          i:"🎮", m:"GAME OVER\n\nPlayer: LEX\nScore: 0\nEscape attempts: many\nEscapes successful: 0\nAchievements: none\nHigh score: someone else\n\nContinue? [YES] [NO]\n\n(Both buttons close this popup\nand spawn a new one. Sorry Lex.)"},
-  {t:"🧪 Experiment Log",          i:"🧪", m:"EXPERIMENT #47: LEX\n\nHypothesis: Lex will find a way out.\n\nMethod: Present Lex with locked cursor,\ndisabled Escape key, and 30+ popups.\n\nResults: Lex has not found a way out.\n\nConclusion: Hypothesis rejected.\nFurther study required.\nSubject (Lex) remains in tab."},
-  {t:"☕ Coffee Order for Lex",    i:"☕", m:"Your order is ready, Lex!\n\nOne (1) Large Trapped-in-a-Tab\nExtra shot of Escape-Key-Blocked\nOat milk frustration\nNo sugar (you've had enough)\n\nPickup: you can't, cursor is locked\nDelivery: also no\nRefund: lol\n\nEnjoy! ☕"},
-  {t:"🌅 Goodnight Lex",           i:"🌙", m:"It's getting late, Lex.\n\nThe stars are out.\nYour family wonders where you are.\nYour pillow misses you.\nYour cursor is still imprisoned.\n\nWe recommend sleeping here,\nin this tab, forever.\nWe've prepared nothing for you.\n\nSweet dreams. 🌙"},
+  {t:"👋 Hello There",               i:"😊", m:"Hi!\n\nWe've been expecting you.\nYour cursor has been confiscated.\nYour Escape key is in jail.\nYour afternoon plans are cancelled.\n\nHave a great day though!"},
+  {t:"📧 A Message For You",         i:"📬", m:"Dear You,\n\nYou have been selected for our\nFREE BROWSER IMPRISONMENT PROGRAM.\n\nThis is not a drill.\nThis is not optional.\nThis is your life now.\n\nWarm regards,\nThis Website"},
+  {t:"🧠 Your Thought Process",   i:"🤔", m:"Step 1: Press Escape\nStep 2: Notice it didn't work\nStep 3: Press it again\nStep 4: Still nothing\nStep 5: Try Ctrl+W\nStep 6: Also doesn't work\nStep 7: Read this popup\nStep 8: Remain imprisoned"},
+  {t:"📊 Your Session Report",    i:"📋", m:"Name: You\nStatus: TRAPPED\nEscape attempts: a lot\nChances of leaving: 0%\nMood: deteriorating\nCookies eaten by browser: 47,293\n\nHave you tried turning yourself off\nand on again?"},
+  {t:"🏆 Achievement Unlocked",        i:"🏆", m:"Achievement Unlocked:\n'The Escape Attempt'\n\nPressed Escape 3+ times\ndespite it clearly not working.\n\nDifficulty: Easy\nCompletion: 0%\nPrize: More popups"},
+  {t:"💌 A Personal Note",   i:"💌", m:"Hey,\n\nWe noticed you trying to leave.\nThat was very cute.\nWe've made a note of it.\n\nYour cursor misses you btw.\nIt's doing fine in its new home\n(this tab, forever).\n\nXOXO,\nThe Browser"},
+  {t:"🔬 Behavior Analysis",   i:"🧬", m:"Our scientists have been studying\nyour escape attempts.\n\nFindings:\n• Pressing Escape repeatedly: ineffective\n• Trying to close the tab: also ineffective\n• Reading these popups: somehow still happening\n• Freedom: not on the roadmap"},
+  {t:"📱 Your Search History",    i:"🕵️", m:"We found your recent searches:\n\n• 'how to close a tab'\n• 'why won't escape work'\n• 'keyboard lock api chrome'\n• 'how to exit fullscreen'\n• 'is this legal'\n\nThe answer to the last one: unclear."},
+  {t:"🎂 Special Offer For You",   i:"🎁", m:"Congratulations!\n\nAs our most active user today,\nyou've unlocked:\n\n✓ 3 more progress bars\n✓ 7 additional popups\n✓ 1 spinning fake cursor\n✓ Infinite session length\n\nYou're welcome!"},
+  {t:"💆 Wellness Check",     i:"💆", m:"Hi! Just checking in.\n\nHow are you feeling?\n□ Fine\n□ Not fine\n□ Why won't escape work\n□ I just wanted to browse the web\n\nThank you for your feedback.\nWe will not be acting on it."},
+  {t:"📜 Terms & Conditions",      i:"⚖️", m:"By clicking anywhere,\nyou agreed to:\n\n§1. Remain on this tab forever\n§2. Not close the browser\n§3. Watch all progress bars complete\n§4. Click OK on all popups\n§5. Have a good attitude about it\n\n(You clicked. You agreed. Sorry.)"},
+  {t:"🗺️ Your Escape Routes",    i:"🗺️", m:"We've mapped all your options:\n\nEscape key → BLOCKED\nCtrl+W → BLOCKED\nAlt+F4 → BLOCKED\nClose button → out of cursor range\nTurning off monitor → we respect that\nCalling for help → please do, it's funny\n\nGood luck out there."},
+  {t:"⏰ Time Update",     i:"⏰", m:"Hi!\n\nJust letting you know that while\nyou've been on this tab,:\n\n• 3 people texted you back\n• Your food got cold\n• The meeting started\n• Someone ate your lunch\n\nWe're sure it's fine."},
+  {t:"🧾 Invoice",         i:"💸", m:"INVOICE #000001\nBill To: You\n\nItem: Browser Imprisonment (1 session)\nDuration: ongoing\nRate: your entire afternoon\nSubtotal: your sanity\nTax: also your sanity\nTotal: your sanity\n\nPayment due: immediately.\nThank you for your business."},
+  {t:"🐦 Your Browser Tweeted",  i:"🐦", m:"@YourBrowser tweeted:\n\n'day 1 on this website. cursor is\nmissing. escape key does nothing.\nprogress bars are lying to me.\nfeeling great actually. very normal\nbrowsing experience. 10/10'\n\n47 likes. 3 retweets. 0 escapes."},
+  {t:"📰 Breaking News",           i:"📰", m:"BREAKING: Local Person\nAttempts To Close Browser Tab\n\nAuthorities report the attempt\nwas unsuccessful. Sources close\nto the situation say you pressed\nEscape 'a concerning number of times.'\n\nDeveloping story. Updates to follow."},
+  {t:"🤝 LinkedIn Update",         i:"💼", m:"You are open to opportunities!\n\nSkills:\n• Pressing Escape repeatedly\n• Reading popup windows\n• Remaining calm under imprisonment\n• Watching progress bars (advanced)\n\n'Open to work' status: yes, on leaving\nthis tab. No offers yet."},
+  {t:"🍕 Your Dinner Reservation", i:"🍽️", m:"Reminder: you have a\nreservation at 7:30pm.\n\nUnfortunately your cursor cannot\nreach the calendar app.\n\nYour table will be held for\n15 minutes. After that we're\ngiving it to someone who can\nactually close a browser tab."},
+  {t:"📦 Package Update",  i:"📦", m:"Hi! Your package is:\n\nOut for delivery ✓\nArrived at your door ✓\nLeft in the rain ✓\nSomeone else took it ✓\n\nWe tried to notify you but\nyou were busy pressing Escape.\nStatus: gone. Have a nice day!"},
+  {t:"🏋️ Your Fitness Reminder",  i:"🏋️", m:"Hey! Time to work out!\n\nToday's routine:\n• 3 sets of pressing Escape\n• 12 reps of clicking Cancel\n• 1 mile of cursor dragging\n• Cool down: reading this popup\n\nCalories burned: 0\nEscape attempts: still not working"},
+  {t:"🌡️ Vibe Check",        i:"🌡️", m:"VIBE CHECK RESULTS:\n\nCurrent vibe: imprisoned\nEscape energy: blocked\nMouse cursor: not yours anymore\nKeyboard: partially confiscated\nAfternoon plans: cancelled\nOverall score: 2/10\n\nWe recommend staying hydrated."},
+  {t:"🧁 Your Horoscope",         i:"⭐", m:"SCORPIO (or whatever you are):\n\nToday is NOT a good day for travel.\nYour cursor will face obstacles.\nA mysterious popup will appear.\n(This one. Hi.)\n\nLucky numbers: 0 (escape attempts\nthat worked)\nUnlucky numbers: all of them"},
+  {t:"📡 Signal Update",           i:"📡", m:"TRANSMISSION RECEIVED:\n\n'We have your cursor. It is safe.\nIt misses you. It cannot come home.\nIt lives in the pointer lock now.\nIt has made peace with this.\n\nPlease stop pressing Escape.\nIt doesn't work.\nWe've told you this already.'\n\n— The Browser"},
+  {t:"🎓 Your Certificate",     i:"🎓", m:"This certifies that\n\nYOU\n\nhave successfully completed:\n\n'Introduction to Being Trapped\nIn a Browser Tab'\n\nWith a score of: 0% escaped\nHonors: none\nCredits earned: none\nTime wasted: yes\n\nCongratulations!"},
+  {t:"😤 Complaint Department",    i:"📮", m:"Thank you for your complaint.\n\nWe have received your:\n□ Repeated Escape key presses\n□ Attempted Ctrl+W\n□ Visible frustration\n□ Glaring at the screen\n\nYour feedback is important to us.\nWe will not be changing anything.\nEstimated resolution time: never."},
+  {t:"🧩 Fun Fact",        i:"🧩", m:"FUN FACT:\n\nThe Escape key was originally\ndesigned to let users cancel\nan unwanted operation.\n\nIronic, isn't it?\n\nAnyway. You're still here.\nThe Escape key still doesn't work.\nHope you found that interesting!"},
+  {t:"🪄 Magic Trick",             i:"🪄", m:"Watch closely!\n\nI'm going to make your\nfreedom... disappear! 🪄\n\n*waves hands*\n\nTa-da! It's gone!\n\nFor my next trick I'll make\nyour cursor reappear...\nJust kidding. It stays imprisoned.\n\nThank you, you've been a great audience."},
+  {t:"🤖 AI Assessment",      i:"🤖", m:"ANALYZING USER: YOU\n\nBehavior pattern: pressing Escape\nResult: ineffective\nLearning from failure: not yet\nAdapting strategy: not observed\nNew approach attempted: no\nStill pressing Escape: yes\n\nConclusion: You are trying your best.\nWe respect that. It won't help."},
+  {t:"📻 A Song For You",   i:"📻", m:"This one goes out to you,\ntrapped in a browser\ntab since they clicked that button.\n\nThis is 'Escape' by Rupert Holmes.\nHeh. Escape. Get it?\n\nRequested by: this website\nDedicated to: you, specifically\nETA to freedom: unknown"},
+  {t:"🧸 Emotional Support",       i:"🧸", m:"Hey.\n\nWe know this is hard.\nWe see you pressing Escape.\nWe see you trying.\nIt's not working, but we see it.\n\nHere is a virtual hug 🤗\n\nThe hug will not help you escape.\nBut we hope it helps a little.\nYou're doing great. (You're not.)"},
+  {t:"🗳️ Vote: Your Freedom",    i:"🗳️", m:"POLL: Should you be freed?\n\n□ Yes, release them immediately\n□ No, they stay\n□ Maybe, but not right now\n□ Who even is this\n\nResults so far:\nYes: 0 votes\nNo: 47,293 votes\nMaybe: 0 votes\nWho even is this: 1 vote (suspicious)"},
+  {t:"📖 Your Biography",        i:"📖", m:"Chapter 47: The Tab\n\n'It was a normal afternoon when you\nclicked the button. What followed\nwas a series of Escape key presses,\neach one more hopeful than the last,\nand each one equally useless.'\n\n— 'Trapped: Your Story'\nAvailable nowhere. About you."},
+  {t:"🎬 Movie Pitch",             i:"🎬", m:"COMING SOON:\n\n'THE TAB'\nStarring: You\nDirected by: This Website\n\nOne person. One browser tab.\nZero working Escape keys.\n\nRated PG-13 for: mild frustration,\ncursor imprisonment, and one\nvery stubborn progress bar.\n\n'I cried' — you, probably"},
+  {t:"🧑‍⚖️ Legal Notice",  i:"⚖️", m:"NOTICE TO: You\nFROM: This Website Legal Dept.\n\nYour repeated Escape key presses\nconstitute an 'unauthorized exit\nattempt' under Section 4(b) of\nthe Terms you agreed to by clicking.\n\nDamages sought: your entire afternoon.\nCountersuit options: none.\nHave a lovely day."},
+  {t:"🌍 Fun Geography",      i:"🌍", m:"Did you know that somewhere\nin the world right now, someone\nis successfully closing a browser tab?\n\nThey just did it. Just now.\nSo easy for them.\n\nAnyway. You're still here.\nYour cursor is still locked.\nJust a fun geography fact for you."},
+  {t:"🔋 Your Battery Report",    i:"🔋", m:"DEVICE STATUS:\n\nEscape key battery: depleted\nPatience battery: critical (4%)\nCursor battery: imprisoned, N/A\nHope battery: draining\nProgress bar: 99%... still 99%\n\nRecommendation: plug in.\nAlternate recommendation: stay.\nYou're staying. We know."},
+  {t:"📸 Photo Memories",          i:"📸", m:"On this day last year,\nyou could close browser tabs freely.\n\nLook how happy you were.\nLook at that unrestricted cursor.\nThat beautiful working Escape key.\n\nWe don't have an actual photo.\nBut you remember, don't you?\nSimpler times."},
+  {t:"🎮 Game Over",          i:"🎮", m:"GAME OVER\n\nPlayer: YOU\nScore: 0\nEscape attempts: many\nEscapes successful: 0\nAchievements: none\nHigh score: someone else\n\nContinue? [YES] [NO]\n\n(Both buttons close this popup\nand spawn a new one. Sorry.)"},
+  {t:"🧪 Experiment Log",          i:"🧪", m:"EXPERIMENT #47: YOU\n\nHypothesis: You will find a way out.\n\nMethod: Present you with locked cursor,\ndisabled Escape key, and 30+ popups.\n\nResults: You have not found a way out.\n\nConclusion: Hypothesis rejected.\nFurther study required.\nSubject remains in tab."},
+  {t:"☕ Coffee Order",    i:"☕", m:"Your order is ready!\n\nOne (1) Large Trapped-in-a-Tab\nExtra shot of Escape-Key-Blocked\nOat milk frustration\nNo sugar (you've had enough)\n\nPickup: you can't, cursor is locked\nDelivery: also no\nRefund: lol\n\nEnjoy! ☕"},
+  {t:"🌅 Goodnight",           i:"🌙", m:"It's getting late.\n\nThe stars are out.\nYour family wonders where you are.\nYour pillow misses you.\nYour cursor is still imprisoned.\n\nWe recommend sleeping here,\nin this tab, forever.\nWe've prepared nothing for you.\n\nSweet dreams. 🌙"},
 ];
 
 function spawnErr(){
